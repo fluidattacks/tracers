@@ -2,16 +2,10 @@
 import asyncio
 import contextlib
 import functools
-import inspect
 import operator
 import time
 import uuid
-from contextvars import (
-    ContextVar,
-    Token,
-)
 from typing import (
-    Any,
     Callable,
     List,
     Tuple,
@@ -32,80 +26,17 @@ from tracers.containers import (
     LoopSnapshot,
 )
 from tracers.contextvars import (
-    ALL as ALL_CONTEXTVARS,
     LEVEL,
     LOOP_SNAPSHOTS,
+    reset_all as reset_all_contextvars,
     STACK,
     TRACING,
 )
-
-
-def divide(
-    *,
-    numerator: float,
-    denominator: float,
-    on_zero_denominator: float,
-) -> float:
-    return \
-        on_zero_denominator if denominator == 0.0 else numerator / denominator
-
-
-def get_function_id(function: Callable, function_name: str = '') -> str:
-    # Adding decorators to a function modify its metadata
-    #   Fortunately functools' wrapped functions keep a reference to the parent
-    while hasattr(function, '__wrapped__'):
-        function = getattr(function, '__wrapped__')
-
-    signature: str = '(...)'
-    with contextlib.suppress(ValueError):
-        signature = str(inspect.signature(function))
-
-    module: str = function.__module__
-    name: str = function_name or function.__name__
-    prefix = 'async ' * asyncio.iscoroutinefunction(function)
-    signature = signature if len(signature) < 48 else '(...)'
-
-    if module not in {'__main__'}:
-        return f'{prefix}{module}.{name}{signature}'
-
-    return f'{prefix}{name}{signature}'
-
-
-def reset_contextvars():
-
-    def reset_context_var(
-        contextvar: ContextVar,
-        default_value_creator: Callable[[], Any],
-    ) -> None:
-        obj = contextvar.get(None)
-
-        if obj:
-            if isinstance(obj, list):
-                # Delete all elements
-                obj.clear()
-            elif isinstance(obj, (bool, int)):
-                # This never leaks
-                pass
-            else:
-                raise TypeError(f'Missing handler for type: {type(obj)}')
-
-        # Delete reference
-        del obj
-
-        # Re-initialize to its default value
-        var.set(default_value_creator())
-
-    for var, default_value_creator in ALL_CONTEXTVARS:
-        reset_context_var(var, default_value_creator)
-
-
-@contextlib.contextmanager
-def increase_counter(contextvar):
-    token: Token = contextvar.set(contextvar.get() + 1)
-    try:
-        yield
-    finally:
-        contextvar.reset(token)
+from tracers.utils import (
+    divide,
+    get_function_id,
+    increase_counter,
+)
 
 
 def measure_loop_skew(clock_id: int):
@@ -277,7 +208,7 @@ def _get_wrapper(  # noqa: MC001
             @functools.wraps(function)
             async def wrapper(*args, **kwargs):
                 if LEVEL.get() == 0:
-                    reset_contextvars()
+                    reset_all_contextvars()
 
                 with increase_counter(LEVEL):
                     measure_loop_skew(clock_id)
@@ -296,7 +227,7 @@ def _get_wrapper(  # noqa: MC001
             @functools.wraps(function)
             def wrapper(*args, **kwargs):
                 if LEVEL.get() == 0:
-                    reset_contextvars()
+                    reset_all_contextvars()
 
                 with increase_counter(LEVEL):
                     record_event(clock_id, 'call', function, function_name)
