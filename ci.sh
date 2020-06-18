@@ -36,6 +36,10 @@ then
     print(time.strftime(f"%y.%m.{minutes_month}"))
   ')
 
+  echo "[INFO] Tagging: ${version}"
+  git tag --message "release-${version}" --sign "release-${version}"
+  git push origin "release-${version}"
+
   echo "[INFO] Publishing: ${version}"
   sed -i "s/^version = .*$/version = \"${version}\"/g" pyproject.toml
   trap "sed -i 's/^version = .*$/version = \"1.0.0\"/g' pyproject.toml" EXIT
