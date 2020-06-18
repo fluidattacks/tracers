@@ -31,20 +31,12 @@ from tracers.containers import (
     Frame,
     LoopSnapshot,
 )
-
-# Contextvars
-TRACING: ContextVar[bool] = ContextVar('TRACING', default=True)
-LEVEL: ContextVar[int] = ContextVar('LEVEL', default=0)
-STACK: ContextVar[List[Frame]] = ContextVar('STACK', default=[])
-
-LOOP_SNAPSHOTS: ContextVar[List[LoopSnapshot]] = \
-    ContextVar('LOOP_SNAPSHOTS', default=[])
-
-ALL_CONTEXTVARS: Tuple[Tuple[ContextVar, Callable[[], Any]], ...] = (
-    (TRACING, lambda: True),
-    (LEVEL, lambda: 0),
-    (STACK, lambda: []),
-    (LOOP_SNAPSHOTS, lambda: []),
+from tracers.contextvars import (
+    ALL as ALL_CONTEXTVARS,
+    LEVEL,
+    LOOP_SNAPSHOTS,
+    STACK,
+    TRACING,
 )
 
 
