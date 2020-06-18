@@ -30,7 +30,6 @@ then
     --strictness veryhigh \
     --with-tool mypy \
     --without-tool pep257 \
-    --without-tool pyflakes \
     src
   echo '[INFO] Running examples linters'
   poetry run prospector \
