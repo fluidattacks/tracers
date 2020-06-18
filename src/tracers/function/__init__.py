@@ -24,6 +24,9 @@ CHAR_CHECK_MARK = chr(0X2713)
 CHAR_BROKEN_BAR = chr(0xA6)
 CHAR_SUPERSCRIPT_ONE = chr(0x00B9)
 
+EVENT_LOOP_CHECK_INTERVAL: float = 0.01
+EVENT_LOOP_SKEW_TOLERANCE: float = 1.15
+
 # Containers
 Frame = NamedTuple('Frame', [
     ('event', str),
@@ -55,7 +58,7 @@ def divide(
     on_zero_denominator: float,
 ) -> float:
     return \
-        numerator / denominator if denominator > 0.0 else on_zero_denominator
+        on_zero_denominator if denominator == 0.0 else numerator / denominator
 
 
 def get_function_id(function: Callable, function_name: str = '') -> str:
@@ -94,7 +97,6 @@ def measure_event_loop_skew(clock_id: int):
         expected_tick_duration: float,
         start_timestamp: float,
     ):
-        tolerance: float = 1.05
         timestamp: float = time.clock_gettime(clock_id)
         real_tick_duration: float = timestamp - start_timestamp
         block_duration_ratio: float = divide(
@@ -108,7 +110,7 @@ def measure_event_loop_skew(clock_id: int):
             expected_tick_duration=expected_tick_duration,
             real_tick_duration=real_tick_duration,
             timestamp=start_timestamp,
-            was_blocked=block_duration_ratio >= tolerance,
+            was_blocked=block_duration_ratio >= EVENT_LOOP_SKEW_TOLERANCE,
         ))
 
         if LEVEL.get() == 1:
@@ -128,7 +130,7 @@ def measure_event_loop_skew(clock_id: int):
             )
 
     if LEVEL.get() == 1:
-        schedule_callback(0.1)
+        schedule_callback(EVENT_LOOP_CHECK_INTERVAL)
 
 
 def record_event(
