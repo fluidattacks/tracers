@@ -14,7 +14,6 @@ from typing import (
     Any,
     Callable,
     List,
-    NamedTuple,
     Tuple,
 )
 
@@ -28,20 +27,10 @@ from tracers.constants import (
     LOOP_CHECK_INTERVAL,
     LOOP_SKEW_TOLERANCE,
 )
-
-# Containers
-Frame = NamedTuple('Frame', [
-    ('event', str),
-    ('function', str),
-    ('level', int),
-    ('timestamp', float),
-])
-LoopSnapshot = NamedTuple('LoopSnapshot', [
-    ('block_duration_ratio', float),
-    ('wanted_tick_duration', float),
-    ('real_tick_duration', float),
-    ('timestamp', float),
-])
+from tracers.containers import (
+    Frame,
+    LoopSnapshot,
+)
 
 # Contextvars
 TRACING: ContextVar[bool] = ContextVar('TRACING', default=True)
