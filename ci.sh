@@ -11,17 +11,33 @@ poetry update
 echo '[INFO] Installing'
 poetry install
 
-echo '[INFO] Running tests'
-for example in examples/*
-do
-  echo "[INFO] Running test: ${example}"
-  poetry run python "${example}"
-done
+if test "${1:-}" == 'test' \
+  || test "${1:-}" == 'publish'
+then
+  echo '[INFO] Running tests'
+  for example in examples/*
+  do
+    echo "[INFO] Running test: ${example}"
+    poetry run python "${example}"
+  done
+fi
 
-echo '[INFO] Running code linters'
-poetry run prospector --strictness veryhigh --with-tool mypy --without-tool pep257 src
-echo '[INFO] Running examples linters'
-poetry run prospector --strictness veryhigh --without-tool pep257 examples/*
+if test "${1:-}" == 'lint' \
+  || test "${1:-}" == 'publish'
+then
+  echo '[INFO] Running code linters'
+  poetry run prospector \
+    --strictness veryhigh \
+    --with-tool mypy \
+    --without-tool pep257 \
+    --without-tool pyflakes \
+    src
+  echo '[INFO] Running examples linters'
+  poetry run prospector \
+    --strictness veryhigh \
+    --without-tool pep257 \
+    examples/*
+fi
 
 if test "${1:-}" == 'publish'
 then
