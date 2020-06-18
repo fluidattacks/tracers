@@ -19,7 +19,15 @@ from typing import (
 )
 
 # Local libraries
-from tracers.constants import *
+from tracers.constants import (
+    CHAR_BROKEN_BAR,
+    CHAR_CHECK_MARK,
+    CHAR_INFO,
+    CHAR_SPACE,
+    CHAR_SUPERSCRIPT_ONE,
+    LOOP_CHECK_INTERVAL,
+    LOOP_SKEW_TOLERANCE,
+)
 
 # Containers
 Frame = NamedTuple('Frame', [
