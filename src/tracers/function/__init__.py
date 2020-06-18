@@ -11,6 +11,7 @@ from contextvars import (
     Token,
 )
 from typing import (
+    Any,
     Callable,
     List,
     NamedTuple,
@@ -50,6 +51,13 @@ STACK: ContextVar[List[Frame]] = ContextVar('STACK', default=[])
 EVENT_LOOP_TIMER_SNAPSHOTS: ContextVar[List[EventLoopTimerSnapshot]] = \
     ContextVar('EVENT_LOOP_TIMER_SNAPSHOTS', default=[])
 
+ALL_CONTEXTVARS: Tuple[Tuple[ContextVar, Callable[[], Any]], ...] = (
+    (DO_TRACE, lambda: True),
+    (LEVEL, lambda: 0),
+    (STACK, lambda: []),
+    (EVENT_LOOP_TIMER_SNAPSHOTS, lambda: []),
+)
+
 
 def divide(
     *,
@@ -80,6 +88,34 @@ def get_function_id(function: Callable, function_name: str = '') -> str:
         return f'{prefix}{module}.{name}{signature}'
 
     return f'{prefix}{name}{signature}'
+
+
+def reset_contextvars():
+
+    def reset_context_var(
+        contextvar: ContextVar,
+        default_value_creator: Callable[[], Any],
+    ) -> None:
+        obj = contextvar.get(None)
+
+        if obj:
+            if isinstance(obj, list):
+                # Delete all elements
+                obj.clear()
+            elif isinstance(obj, (bool, int)):
+                # This never leaks
+                pass
+            else:
+                raise TypeError(f'Missing handler for type: {type(obj)}')
+
+        # Delete reference
+        del obj
+
+        # Re-initialize to its default value
+        var.set(default_value_creator())
+
+    for var, default_value_creator in ALL_CONTEXTVARS:
+        reset_context_var(var, default_value_creator)
 
 
 @contextlib.contextmanager
@@ -255,8 +291,7 @@ def _get_wrapper(  # noqa: MC001
             @functools.wraps(function)
             async def wrapper(*args, **kwargs):
                 if LEVEL.get() == 0:
-                    EVENT_LOOP_TIMER_SNAPSHOTS.set([])
-                    STACK.set([])
+                    reset_contextvars()
 
                 with increase_counter(LEVEL):
                     measure_event_loop_skew(clock_id)
@@ -274,7 +309,7 @@ def _get_wrapper(  # noqa: MC001
             @functools.wraps(function)
             def wrapper(*args, **kwargs):
                 if LEVEL.get() == 0:
-                    STACK.set([])
+                    reset_contextvars()
 
                 with increase_counter(LEVEL):
                     record_event(clock_id, 'call', function, function_name)
