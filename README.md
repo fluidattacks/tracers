@@ -13,35 +13,35 @@
 that offers you zero overhead wrappers for profiling your code execution flow
 
 ```
-🛈  Finished transaction: be52e17b941045b5bc54a38c7fe794aa, 3.81 seconds
+🛈  Finished transaction: 71b75b75d72743b882fe4f2205a451fd, 3.82 seconds
 
   #    Timestamp       %     Total    Nested Call Chain
 
-     1     0.00s  100.0%     3.81s    ✓ async function_a()
-     2     0.00s    2.6%     0.10s    ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
+     1     0.00s  100.0%     3.82s    ✓ async function_a()
+     2     0.00s    2.7%     0.10s    ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
      3     0.10s   13.1%     0.50s    ¦   ✓ time.sleep(...)
      4     0.60s   84.2%     3.21s    ¦   ✓ async function_b()
-     5     0.60s    2.6%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
+     5     0.60s    2.7%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
      6     0.70s   18.4%     0.70s    ¦   ¦   ✓ async function_c()
      7     0.70s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
-     8     0.80s   13.1%     0.50s    ¦   ¦   ¦   ✓ time.sleep(...)
-     9     1.30s    2.7%     0.10s    ¦   ¦   ¦   ✓ async function_d()
+     8     0.81s   13.1%     0.50s    ¦   ¦   ¦   ✓ time.sleep(...)
+     9     1.31s    2.6%     0.10s    ¦   ¦   ¦   ✓ async function_d()
     10     1.31s    2.6%     0.10s    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
     11     1.41s   52.5%     2.00s    ¦   ¦   ✓ time.sleep(...)
     12     3.41s    2.6%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
-    13     3.51s    2.6%     0.10s    ¦   ¦   ✓ async function_d()
+    13     3.51s    2.7%     0.10s    ¦   ¦   ✓ async function_d()
     14     3.51s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
-    15     3.61s    2.6%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
-    16     3.71s    2.6%     0.10s    ¦   ¦   ✓ async function_e()
-    17     3.71s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
+    15     3.61s    2.7%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
+    16     3.72s    2.6%     0.10s    ¦   ¦   ✓ async function_e()
+    17     3.72s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep(delay, result=None, *, loop=None)
 
   Some blocks (skews) occurred in the event loop ¹
 
-  #    Timestamp  Excess     Delay
+  #    Timestamp     Delay
 
-     0     1.41s 2003.5%     2.00s
-     1     0.80s  501.8%     0.50s
-     2     0.10s  501.8%     0.50s
+     0     1.40s     2.00s
+     1     0.80s     0.50s
+     2     0.10s     0.50s
 
   ¹ Consider reviewing them carefully to improve the overall system throughput
 ```
