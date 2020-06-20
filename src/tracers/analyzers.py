@@ -79,6 +79,7 @@ def analyze_stack(stack: List[Frame]):
     print()
 
     counter: int = 0
+    results: List[tuple] = []
     for index, frame in enumerate(stack):
         indentation: str = (
             (CHAR_SPACE * 3 + CHAR_BROKEN_BAR) * (frame.level - 1)
@@ -102,11 +103,28 @@ def analyze_stack(stack: List[Frame]):
                 on_zero_denominator=1.0,
             )
 
-            print(
-                f'{counter:>6} '
-                f'{relative_timestamp:>8.2f}s '
-                f'{raw_time_ratio:>6.1f}% '
-                f'{raw_time_seconds:>8.2f}s '
-                f'{indentation} '
-                f'{frame.function}'
-            )
+            results.append((
+                counter,
+                relative_timestamp,
+                raw_time_ratio,
+                raw_time_seconds,
+                indentation,
+                frame.function,
+            ))
+
+    for (
+        counter,
+        relative_timestamp,
+        raw_time_ratio,
+        raw_time_seconds,
+        indentation,
+        function,
+    ) in results:
+        print(
+            f'{counter:>6} '
+            f'{relative_timestamp:>8.2f}s '
+            f'{raw_time_ratio:>6.1f}% '
+            f'{raw_time_seconds:>8.2f}s '
+            f'{indentation} '
+            f'{function}'
+        )
