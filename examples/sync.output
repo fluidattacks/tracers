@@ -1,0 +1,36 @@
+
+🛈  Finished transaction: 4f0866ab12324a079b8a5c9ad83221e2, 0.81 seconds
+
+  #    Timestamp       %     Total    Nested Call Chain
+
+     1     0.00s  100.0%     0.81s    ✓ function_a
+     2     0.00s   12.5%     0.10s    ¦   ✓ time.sleep
+     3     0.10s   87.5%     0.70s    ¦   ✓ function_b
+     4     0.10s   12.5%     0.10s    ¦   ¦   ✓ time.sleep
+     5     0.20s   25.0%     0.20s    ¦   ¦   ✓ function_c
+     6     0.20s   12.5%     0.10s    ¦   ¦   ¦   ✓ time.sleep
+     7     0.30s   12.5%     0.10s    ¦   ¦   ¦   ✓ function_d
+     8     0.30s   12.5%     0.10s    ¦   ¦   ¦   ¦   ✓ time.sleep
+     9     0.40s   12.5%     0.10s    ¦   ¦   ✓ time.sleep
+    10     0.50s   12.5%     0.10s    ¦   ¦   ✓ function_d
+    11     0.50s   12.5%     0.10s    ¦   ¦   ¦   ✓ time.sleep
+    12     0.60s   12.5%     0.10s    ¦   ¦   ✓ time.sleep
+    13     0.70s   12.5%     0.10s    ¦   ¦   ✓ function_e
+    14     0.70s   12.4%     0.10s    ¦   ¦   ¦   ✓ time.sleep
+
+🛈  Finished transaction: 566f3687517044d3a832bc60936a77aa, 0.70 seconds
+
+  #    Timestamp       %     Total    Nested Call Chain
+
+     1     0.00s  100.0%     0.70s    ✓ function_b
+     2     0.00s   14.2%     0.10s    ¦   ✓ time.sleep
+     3     0.10s   28.6%     0.20s    ¦   ✓ function_c
+     4     0.10s   14.2%     0.10s    ¦   ¦   ✓ time.sleep
+     5     0.20s   14.3%     0.10s    ¦   ¦   ✓ function_d
+     6     0.20s   14.2%     0.10s    ¦   ¦   ¦   ✓ time.sleep
+     7     0.30s   14.2%     0.10s    ¦   ✓ time.sleep
+     8     0.40s   14.3%     0.10s    ¦   ✓ function_d
+     9     0.40s   14.3%     0.10s    ¦   ¦   ✓ time.sleep
+    10     0.50s   14.2%     0.10s    ¦   ✓ time.sleep
+    11     0.60s   14.3%     0.10s    ¦   ✓ function_e
+    12     0.60s   14.2%     0.10s    ¦   ¦   ✓ time.sleep

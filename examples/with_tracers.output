@@ -1,0 +1,7 @@
+
+🛈  Finished transaction: b5f98c289bd142189e76ecffb191f411, 3.00 seconds
+
+  #    Timestamp       %     Total    Nested Call Chain
+
+     1     0.00s  100.0%     3.00s    ✓ example
+     2     2.00s   33.3%     1.00s    ¦   ✓ your_business_logic
