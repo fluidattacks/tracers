@@ -18,7 +18,7 @@ then
   for example in examples/*
   do
     echo "[INFO] Running test: ${example}"
-    poetry run python "${example}"
+    poetry run python "${example}" | tee "${example%.*}.output"
   done
 fi
 
