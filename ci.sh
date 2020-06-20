@@ -15,7 +15,8 @@ if test "${1:-}" == 'test' \
   || test "${1:-}" == 'publish'
 then
   echo '[INFO] Running tests'
-  for example in examples/*
+  rm -f examples/*.output
+  for example in examples/*.py
   do
     echo "[INFO] Running test: ${example}"
     poetry run python "${example}" | tee "${example%.*}.output"
@@ -35,7 +36,7 @@ then
   poetry run prospector \
     --strictness veryhigh \
     --without-tool pep257 \
-    examples/*
+    examples/*.py
 fi
 
 if test "${1:-}" == 'publish'

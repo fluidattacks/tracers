@@ -1,19 +1,19 @@
 
-🛈  Finished transaction: 245204ea89b8415abe594bbd11410b0e, 3.82 seconds
+🛈  Finished transaction: 7ee38f8a1b5d43d5a986554a078cd371, 3.82 seconds
 
   #    Timestamp       %     Total    Nested Call Chain
 
      1     0.00s  100.0%     3.82s    ✓ async function_a
-     2     0.00s    2.7%     0.10s    ¦   ✓ async asyncio.tasks.sleep
+     2     0.00s    2.6%     0.10s    ¦   ✓ async asyncio.tasks.sleep
      3     0.10s   13.1%     0.50s    ¦   ✓ time.sleep
      4     0.60s   84.2%     3.21s    ¦   ✓ async function_b
-     5     0.60s    2.6%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
+     5     0.60s    2.7%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
      6     0.70s   18.4%     0.70s    ¦   ¦   ✓ async function_c
      7     0.70s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
      8     0.81s   13.1%     0.50s    ¦   ¦   ¦   ✓ time.sleep
-     9     1.31s    2.7%     0.10s    ¦   ¦   ¦   ✓ async function_d
+     9     1.31s    2.6%     0.10s    ¦   ¦   ¦   ✓ async function_d
     10     1.31s    2.6%     0.10s    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-    11     1.41s   52.4%     2.00s    ¦   ¦   ✓ time.sleep
+    11     1.41s   52.5%     2.00s    ¦   ¦   ✓ time.sleep
     12     3.41s    2.6%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
     13     3.51s    2.6%     0.10s    ¦   ¦   ✓ async function_d
     14     3.51s    2.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
@@ -25,8 +25,8 @@
 
   #    Timestamp     Delay
 
-     0     1.40s     2.00s 
-     1     0.80s     0.50s 
-     2     0.10s     0.49s 
+     0     1.40s     2.00s
+     1     0.09s     0.50s
+     2     0.80s     0.50s
 
   ¹ Consider reviewing them carefully to improve the overall system throughput

@@ -1,14 +1,6 @@
 
-🛈  Finished transaction: e85a75dc46454b8fa75dacfc575f39ae, 0.81 seconds
+🛈  Finished transaction: f6bb6b19f4a248cd941e05a01deb66f7, 0.81 seconds
 
   #    Timestamp       %     Total    Nested Call Chain
 
      1     0.00s  100.0%     0.81s    ✓ async function_a
-     2     0.00s   12.4%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     3     0.10s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     4     0.20s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     5     0.30s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     6     0.41s   12.4%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     7     0.51s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     8     0.61s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     9     0.71s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep

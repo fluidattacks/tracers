@@ -11,6 +11,10 @@ from typing import (
 )
 
 
+def delta(start_timestamp: float, end_timestamp: float):
+    return end_timestamp - start_timestamp
+
+
 def divide(
     *,
     numerator: float,
@@ -49,3 +53,7 @@ def increase_counter(contextvar):
         yield
     finally:
         contextvar.reset(token)
+
+
+def log(*parts):
+    return print(*parts)
