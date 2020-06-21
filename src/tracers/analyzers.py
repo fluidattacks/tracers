@@ -10,7 +10,6 @@ from typing import (
     List,
     NamedTuple,
 )
-from uuid import uuid4
 
 # Local libraries
 from tracers.containers import (
@@ -107,8 +106,7 @@ def _analyze_stack(stack: List[Frame]):  # pylint: disable=too-many-locals
         delta(stack[0].timestamp, stack[-1].timestamp)
 
     log()
-    log(f'{CHAR_INFO} Finished transaction: {uuid4().hex},',
-        f'{total_time_seconds:.2f} seconds')
+    log(f'{CHAR_INFO} Finished transaction: {total_time_seconds:.2f} seconds')
     log()
     log('     # Timestamp                Net              Total    Call Chain')
     log()

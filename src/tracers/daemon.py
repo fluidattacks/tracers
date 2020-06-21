@@ -1,7 +1,7 @@
 # Standard library
 import asyncio
 from collections import deque
-from threading import Thread
+from multiprocessing import Process
 
 # Third party imports
 from more_itertools import iter_except
@@ -24,4 +24,4 @@ def send_result_to_daemon(result):
 
 
 # Side effect: Start an asynchronous daemon server
-Thread(daemon=True, target=lambda: asyncio.run(daemon())).start()
+Process(daemon=True, target=lambda: asyncio.run(daemon())).start()

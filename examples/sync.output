@@ -1,5 +1,5 @@
 
-🛈  Finished transaction: 8e50ab98bfe74d44a80b1a895dea5be0, 0.80 seconds
+🛈  Finished transaction: 0.80 seconds
 
      # Timestamp                Net              Total    Call Chain
 
@@ -15,32 +15,32 @@
     10     0.50s     0.00s [  0.0%]     0.10s [ 12.5%]    ¦   ¦   ✓ function_d
     11     0.50s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ¦   ✓ time.sleep
     12     0.60s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ✓ time.sleep
-    13     0.70s     0.00s [  0.0%]     0.10s [ 12.5%]    ¦   ¦   ✓ function_e
+    13     0.70s     0.00s [  0.1%]     0.10s [ 12.6%]    ¦   ¦   ✓ function_e
     14     0.70s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ¦   ✓ time.sleep
 
            Count                Net              Total    Function
 
-               8     0.80s [ 99.8%]     0.80s [ 99.8%]    ✓ time.sleep
+               8     0.80s [ 99.7%]     0.80s [ 99.7%]    ✓ time.sleep
+               1     0.00s [  0.1%]     0.10s [ 12.6%]    ✓ function_e
                1     0.00s [  0.1%]     0.70s [ 87.5%]    ✓ function_b
                2     0.00s [  0.0%]     0.20s [ 25.0%]    ✓ function_d
                1     0.00s [  0.0%]     0.20s [ 25.0%]    ✓ function_c
-               1     0.00s [  0.0%]     0.10s [ 12.5%]    ✓ function_e
                1     0.00s [  0.0%]     0.80s [100.0%]    ✓ function_a
 
 
-🛈  Finished transaction: 0495aa92c221428780ce976508bfa4c8, 0.70 seconds
+🛈  Finished transaction: 0.70 seconds
 
      # Timestamp                Net              Total    Call Chain
 
      1     0.00s     0.00s [  0.1%]     0.70s [100.0%]    ✓ function_b
      2     0.00s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ✓ time.sleep
      3     0.10s     0.00s [  0.0%]     0.20s [ 28.6%]    ¦   ✓ function_c
-     4     0.10s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ¦   ✓ time.sleep
+     4     0.10s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ¦   ✓ time.sleep
      5     0.20s     0.00s [  0.0%]     0.10s [ 14.3%]    ¦   ¦   ✓ function_d
      6     0.20s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ¦   ¦   ✓ time.sleep
      7     0.30s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ✓ time.sleep
      8     0.40s     0.00s [  0.0%]     0.10s [ 14.3%]    ¦   ✓ function_d
-     9     0.40s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ¦   ✓ time.sleep
+     9     0.40s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ¦   ✓ time.sleep
     10     0.50s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ✓ time.sleep
     11     0.60s     0.00s [  0.0%]     0.10s [ 14.3%]    ¦   ✓ function_e
     12     0.60s     0.10s [ 14.3%]     0.10s [ 14.3%]    ¦   ¦   ✓ time.sleep
