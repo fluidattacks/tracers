@@ -1,7 +1,11 @@
 
-🛈  Finished transaction: 165372ebe1454f029b68ad8b6469e7d1, 0.81 seconds
+🛈  Finished transaction: 7b1c67a53ab34c7fb495baf250f7f985, 0.81 seconds
 
-  #    Timestamp       %     Total    Nested Call Chain
+     # Timestamp                Net              Total    Call Chain
 
-     1     0.00s  100.0%     0.81s    ✓ async function_a
+     1     0.00s     0.81s [100.0%]     0.81s [100.0%]    ✓ async function_a
+
+           Count                Net              Total    Function
+
+               1     0.81s [100.0%]     0.81s [100.0%]    ✓ async function_a
 

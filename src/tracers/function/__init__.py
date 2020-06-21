@@ -82,13 +82,10 @@ def record_event(
     function: Callable,
     function_name: str = '',
 ):
-    _function_name, _function_signature = get_function_id(function)
-
     STACK.get().append(Frame(
         event=event,
-        function=function_name or _function_name,
+        function=function_name or get_function_id(function),
         level=LEVEL.get(),
-        signature=_function_signature,
         timestamp=time.clock_gettime(clock_id),
     ))
 

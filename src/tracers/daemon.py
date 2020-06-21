@@ -3,10 +3,11 @@ import asyncio
 from collections import deque
 from threading import Thread
 
-# Local libraries
-from tracers.utils import (
-    drain_queue,
-)
+# Third party imports
+from more_itertools import iter_except
+
+# Local imports
+
 
 # Private constants
 _RESULTS_QUEUE: deque = deque()
@@ -15,7 +16,7 @@ _RESULTS_QUEUE: deque = deque()
 async def daemon():
     while True:
         await asyncio.sleep(1.0)
-        len(drain_queue(_RESULTS_QUEUE))
+        tuple(iter_except(_RESULTS_QUEUE.pop, IndexError))
 
 
 def send_result_to_daemon(result):

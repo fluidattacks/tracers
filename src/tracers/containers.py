@@ -8,7 +8,6 @@ Frame = NamedTuple('Frame', [
     ('event', str),
     ('function', str),
     ('level', int),
-    ('signature', str),
     ('timestamp', float),
 ])
 

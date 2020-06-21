@@ -1,7 +1,11 @@
 # Standard library
 import io
 import contextlib
-import operator
+from itertools import groupby
+from operator import (
+    attrgetter,
+    itemgetter,
+)
 from typing import (
     List,
     NamedTuple,
@@ -33,12 +37,14 @@ from tracers.daemon import (
 
 Result = NamedTuple('Result', [
     ('counter', int),
-    ('relative_timestamp', float),
-    ('raw_time_ratio', float),
-    ('raw_time_seconds', float),
+    ('function', str),
     ('indentation', str),
     ('level', int),
-    ('function', str),
+    ('net_time_ratio', float),
+    ('net_time_seconds', float),
+    ('raw_time_ratio', float),
+    ('raw_time_seconds', float),
+    ('relative_timestamp', float),
 ])
 
 
@@ -51,7 +57,7 @@ def analyze_loop_snapshots(
             for snapshot in snapshots
             if snapshot.block_duration_ratio > 1.0 + LOOP_SKEW_TOLERANCE
         ],
-        key=operator.attrgetter('real_tick_duration'),
+        key=attrgetter('real_tick_duration'),
         reverse=True,
     )
 
@@ -93,9 +99,9 @@ def analyze_stack(stack: List[Frame]):
     ))
 
 
-def _analyze_stack(stack: List[Frame]):
+def _analyze_stack(stack: List[Frame]):  # pylint: disable=too-many-locals
     stack_levels: List[int] = \
-        list(map(operator.attrgetter('level'), stack))
+        list(map(attrgetter('level'), stack))
 
     total_time_seconds: float = \
         delta(stack[0].timestamp, stack[-1].timestamp)
@@ -104,7 +110,7 @@ def _analyze_stack(stack: List[Frame]):
     log(f'{CHAR_INFO} Finished transaction: {uuid4().hex},',
         f'{total_time_seconds:.2f} seconds')
     log()
-    log('  #    Timestamp       %     Total    Nested Call Chain')
+    log('     # Timestamp                Net              Total    Call Chain')
     log()
 
     counter: int = 0
@@ -120,8 +126,27 @@ def _analyze_stack(stack: List[Frame]):
             raw_time_seconds: float = \
                 delta(frame_childs[0].timestamp, frame_childs[-1].timestamp)
 
+            net_time_seconds: float = \
+                raw_time_seconds - sum([
+                    +x.timestamp if x.event == 'return' else -x.timestamp
+                    for x in frame_childs
+                    if x.level == frame.level + 1
+                ])
+
             results.append(Result(
                 counter=counter,
+                function=frame.function,
+                indentation=(
+                    (3 * CHAR_SPACE + CHAR_BROKEN_BAR) * (frame.level - 1) +
+                    (3 * CHAR_SPACE + CHAR_CHECK_MARK)
+                ),
+                level=frame.level,
+                net_time_ratio=100.0 * divide(
+                    numerator=net_time_seconds,
+                    denominator=total_time_seconds,
+                    on_zero_denominator=1.0,
+                ),
+                net_time_seconds=net_time_seconds,
                 relative_timestamp=delta(stack[0].timestamp, frame.timestamp),
                 raw_time_ratio=100.0 * divide(
                     numerator=raw_time_seconds,
@@ -129,12 +154,6 @@ def _analyze_stack(stack: List[Frame]):
                     on_zero_denominator=1.0,
                 ),
                 raw_time_seconds=raw_time_seconds,
-                level=frame.level,
-                indentation=(
-                    (CHAR_SPACE * 3 + CHAR_BROKEN_BAR) * (frame.level - 1) +
-                    (CHAR_SPACE * 3 + CHAR_CHECK_MARK)
-                ),
-                function=frame.function,
             ))
 
     if results:
@@ -154,6 +173,51 @@ def _analyze_stack(stack: List[Frame]):
         accumulator.append(results[-1])
         flush_accumulator(accumulator)
 
+    log()
+    log('           Count                Net              Total    Function')
+    log()
+
+    key = attrgetter('function')
+
+    for (
+        function,
+        net_time_ratio,
+        net_time_seconds,
+        raw_time_ratio,
+        raw_time_seconds,
+        times_called
+    ) in sorted(
+        (
+            (
+                function,
+                sum(map(attrgetter('net_time_ratio'), group)),
+                sum(map(attrgetter('net_time_seconds'), group)),
+                sum(map(attrgetter('raw_time_ratio'), group)),
+                sum(map(attrgetter('raw_time_seconds'), group)),
+                len(group),
+            )
+            for function, group_iter in groupby(
+                sorted(
+                    results,
+                    key=key,
+                ),
+                key=key,
+            )
+            for group in [tuple(group_iter)]
+        ),
+        key=itemgetter(2),
+        reverse=True,
+    ):
+        log(
+            f'{times_called:>16}',
+            f'{net_time_seconds:>8.2f}s',
+            f'[{net_time_ratio:>5.1f}%]',
+            f'{raw_time_seconds:>8.2f}s',
+            f'[{raw_time_ratio:>5.1f}%]',
+            f'{3 * CHAR_SPACE + CHAR_CHECK_MARK}',
+            f'{function}',
+        )
+
 
 def flush_accumulator(accumulator: List[Result]):
     if accumulator:
@@ -162,8 +226,10 @@ def flush_accumulator(accumulator: List[Result]):
         log(
             f'{accumulator[0].counter:>6}',
             f'{accumulator[0].relative_timestamp:>8.2f}s',
-            f'{sum(r.raw_time_ratio for r in accumulator):>6.1f}%',
-            f'{sum(r.raw_time_seconds for r in accumulator):>8.2f}s',
+            f'{sum(map(attrgetter("net_time_seconds"), accumulator)):>8.2f}s',
+            f'[{sum(map(attrgetter("net_time_ratio"), accumulator)):>5.1f}%]',
+            f'{sum(map(attrgetter("raw_time_seconds"), accumulator)):>8.2f}s',
+            f'[{sum(map(attrgetter("raw_time_ratio"), accumulator)):>5.1f}%]',
             f'{accumulator[0].indentation}',
             f'{times}{accumulator[0].function}',
         )
