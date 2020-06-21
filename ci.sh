@@ -11,18 +11,6 @@ poetry update
 echo '[INFO] Installing'
 poetry install
 
-if test "${1:-}" == 'test' \
-  || test "${1:-}" == 'publish'
-then
-  echo '[INFO] Running tests'
-  rm -f examples/*.output
-  for example in examples/*.py
-  do
-    echo "[INFO] Running test: ${example}"
-    poetry run python "${example}" | tee "${example%.*}.output"
-  done
-fi
-
 if test "${1:-}" == 'publish'
 then
   version=$(poetry run python -c 'if True:
