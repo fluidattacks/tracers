@@ -3,7 +3,8 @@
 source 'build/include/generic/shell-options.sh'
 
 function main {
-      pushd src/sdk \
+      echo '[INFO] Building the SDK' \
+  && pushd src/sdk \
     &&  poetry update \
     &&  poetry install \
   &&  popd \
