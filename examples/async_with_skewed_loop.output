@@ -7,37 +7,37 @@
      2     0.00s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ✓ async asyncio.tasks.sleep
      3     0.10s     0.50s [ 13.1%]     0.50s [ 13.1%]    ¦   ✓ time.sleep
      4     0.60s     0.00s [  0.0%]     3.21s [ 84.2%]    ¦   ✓ async function_b
-     5     0.60s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+     5     0.60s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ✓ async asyncio.tasks.sleep
      6     0.70s     0.00s [  0.0%]     0.70s [ 18.4%]    ¦   ¦   ✓ async function_c
      7     0.70s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
      8     0.80s     0.50s [ 13.1%]     0.50s [ 13.1%]    ¦   ¦   ¦   ✓ time.sleep
-     9     1.30s     0.00s [  0.0%]     0.10s [  2.6%]    ¦   ¦   ¦   ✓ async function_d
-    10     1.30s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-    11     1.40s     2.00s [ 52.5%]     2.00s [ 52.5%]    ¦   ¦   ✓ time.sleep
-    12     3.41s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ✓ async asyncio.tasks.sleep
-    13     3.51s     0.00s [  0.0%]     0.10s [  2.6%]    ¦   ¦   ✓ async function_d
-    14     3.51s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-    15     3.61s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ✓ async asyncio.tasks.sleep
-    16     3.71s     0.00s [  0.0%]     0.10s [  2.6%]    ¦   ¦   ✓ async function_e
+     9     1.30s     0.00s [  0.0%]     0.10s [  2.7%]    ¦   ¦   ¦   ✓ async function_d
+    10     1.30s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+    11     1.41s     2.00s [ 52.5%]     2.00s [ 52.5%]    ¦   ¦   ✓ time.sleep
+    12     3.41s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+    13     3.51s     0.00s [  0.0%]     0.10s [  2.7%]    ¦   ¦   ✓ async function_d
+    14     3.51s     0.10s [  2.7%]     0.10s [  2.7%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+    15     3.61s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+    16     3.71s     0.00s [  0.0%]     0.10s [  2.7%]    ¦   ¦   ✓ async function_e
     17     3.71s     0.10s [  2.6%]     0.10s [  2.6%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
 
            Count                Net              Total    Function
 
-               3     3.00s [ 78.8%]     3.00s [ 78.8%]    ✓ time.sleep
+               3     3.00s [ 78.7%]     3.00s [ 78.7%]    ✓ time.sleep
                8     0.81s [ 21.2%]     0.81s [ 21.2%]    ✓ async asyncio.tasks.sleep
                1     0.00s [  0.0%]     3.21s [ 84.2%]    ✓ async function_b
-               1     0.00s [  0.0%]     0.70s [ 18.4%]    ✓ async function_c
-               1     0.00s [  0.0%]     3.81s [100.0%]    ✓ async function_a
                2     0.00s [  0.0%]     0.20s [  5.3%]    ✓ async function_d
-               1     0.00s [  0.0%]     0.10s [  2.6%]    ✓ async function_e
+               1     0.00s [  0.0%]     3.81s [100.0%]    ✓ async function_a
+               1     0.00s [  0.0%]     0.70s [ 18.4%]    ✓ async function_c
+               1     0.00s [  0.0%]     0.10s [  2.7%]    ✓ async function_e
 
 
   Some blocks (skews) occurred in the event loop ¹
 
   #    Timestamp     Delay
 
-     0     1.40s     2.00s
+     0     1.41s     1.99s
      1     0.09s     0.50s
-     2     0.80s     0.50s
+     2     0.80s     0.49s
 
   ¹ Consider reviewing them carefully to improve the overall system throughput

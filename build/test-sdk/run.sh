@@ -3,7 +3,8 @@
 source 'build/include/generic/shell-options.sh'
 
 function main {
-      pushd src/sdk \
+      echo '[INFO] Testing the SDK' \
+  && pushd src/sdk \
     &&  echo '[INFO] Running tests' \
     &&  rm -f ../../examples/*.output \
     &&  for example in ../../examples/*.py

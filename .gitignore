@@ -1,7 +1,8 @@
-/.data
-/.envrc
-/dist
-/poetry.lock
+/**/*.egg-info
 /**/.mypy_cache
 /**/__pycache__
-/**/*.egg-info
+/**/dist
+/.data
+/.envrc
+/poetry.lock
+/src/sdk/README.md

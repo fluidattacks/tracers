@@ -3,7 +3,8 @@
 source 'build/include/generic/shell-options.sh'
 
 function main {
-      pushd src/sdk \
+      echo '[INFO] Linting SDK' \
+  && pushd src/sdk \
     &&  poetry run mypy \
           --strict \
           . \
