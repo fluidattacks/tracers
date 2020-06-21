@@ -4,8 +4,6 @@ from typing import (
     NamedTuple,
 )
 
-# Third party imports
-
 Frame = NamedTuple('Frame', [
     ('event', str),
     ('function', str),
