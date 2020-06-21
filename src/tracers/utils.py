@@ -2,14 +2,17 @@
 import asyncio
 import contextlib
 from contextvars import (
+    ContextVar,
     Token,
 )
 from typing import (
+    Any,
     Callable,
+    Iterator,
 )
 
 
-def delta(start_timestamp: float, end_timestamp: float):
+def delta(start_timestamp: float, end_timestamp: float) -> float:
     return end_timestamp - start_timestamp
 
 
@@ -23,7 +26,9 @@ def divide(
         on_zero_denominator if denominator == 0.0 else numerator / denominator
 
 
-def get_function_id(function: Callable) -> str:
+def get_function_id(
+    function: Callable[..., Any],
+) -> str:
     # Adding decorators to a function modify its metadata
     #   Fortunately functools' wrapped functions keep a reference to the parent
     while hasattr(function, '__wrapped__'):
@@ -40,13 +45,13 @@ def get_function_id(function: Callable) -> str:
 
 
 @contextlib.contextmanager
-def increase_counter(contextvar):
-    token: Token = contextvar.set(contextvar.get() + 1)
+def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
+    token: Token[int] = contextvar.set(contextvar.get() + 1)
     try:
         yield
     finally:
         contextvar.reset(token)
 
 
-def log(*parts):
+def log(*parts: Any):
     print(*parts)

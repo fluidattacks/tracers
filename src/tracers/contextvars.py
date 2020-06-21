@@ -24,20 +24,20 @@ STACK: ContextVar[List[Frame]] = \
 TRACING: ContextVar[bool] = \
     ContextVar('TRACING', default=True)
 
-RESETABLE: Tuple[Tuple[ContextVar, Callable[[], Any]], ...] = (
+RESETABLE: Tuple[Tuple[ContextVar[Any], Callable[[], Any]], ...] = (
     (LEVEL, lambda: 0),
     (LOOP_SNAPSHOTS, lambda: []),
     (STACK, lambda: []),
 )
 
 
-def reset_all():
+def reset_all() -> None:
     for var, default_value_creator in RESETABLE:
         reset_one(var, default_value_creator)
 
 
 def reset_one(
-    contextvar: ContextVar,
+    contextvar: ContextVar[Any],
     default_value_creator: Callable[[], Any],
 ) -> None:
     obj = contextvar.get(None)
