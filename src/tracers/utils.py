@@ -1,5 +1,6 @@
 # Standard library
 import asyncio
+from collections import deque
 import contextlib
 from contextvars import (
     Token,
@@ -9,6 +10,9 @@ from typing import (
     Callable,
     Tuple,
 )
+
+# Third party imports
+from more_itertools import iter_except
 
 
 def delta(start_timestamp: float, end_timestamp: float):
@@ -23,6 +27,10 @@ def divide(
 ) -> float:
     return \
         on_zero_denominator if denominator == 0.0 else numerator / denominator
+
+
+def drain_queue(queue: deque) -> tuple:
+    return tuple(iter_except(queue.pop, IndexError))
 
 
 def get_function_id(function: Callable) -> Tuple[str, str]:
@@ -56,4 +64,4 @@ def increase_counter(contextvar):
 
 
 def log(*parts):
-    return print(*parts)
+    print(*parts)

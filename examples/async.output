@@ -1,36 +1,38 @@
 
-🛈  Finished transaction: 59414e181a844b9db90606c8b7912afa, 0.71 seconds
+🛈  Finished transaction: ffed38238667468799dfd424ba353466, 0.71 seconds
 
   #    Timestamp       %     Total    Nested Call Chain
 
      1     0.00s  100.0%     0.71s    ✓ async function_b
-     2     0.00s   14.4%     0.10s    ¦   ✓ async asyncio.tasks.sleep
+     2     0.00s   14.3%     0.10s    ¦   ✓ async asyncio.tasks.sleep
      3     0.10s   28.5%     0.20s    ¦   ✓ async function_c
      4     0.10s   14.2%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
      5     0.20s   14.3%     0.10s    ¦   ¦   ✓ async function_d
-     6     0.20s   14.3%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-     7     0.30s   14.2%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     8     0.41s   14.3%     0.10s    ¦   ✓ async function_d
-     9     0.41s   14.3%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
-    10     0.51s   14.4%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-    11     0.61s   14.1%     0.10s    ¦   ✓ async function_e
-    12     0.61s   14.1%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
+     6     0.20s   14.2%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+     7     0.31s   14.3%     0.10s    ¦   ✓ async asyncio.tasks.sleep
+     8     0.41s   14.2%     0.10s    ¦   ✓ async function_d
+     9     0.41s   14.2%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
+    10     0.51s   14.2%     0.10s    ¦   ✓ async asyncio.tasks.sleep
+    11     0.61s   14.3%     0.10s    ¦   ✓ async function_e
+    12     0.61s   14.2%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
 
-🛈  Finished transaction: 8d5197f445344ed4b3c5e2c4541ebc30, 0.81 seconds
+
+🛈  Finished transaction: 7bff637664e7425492b1e952a301bfa0, 0.81 seconds
 
   #    Timestamp       %     Total    Nested Call Chain
 
      1     0.00s  100.0%     0.81s    ✓ async function_a
-     2     0.00s   12.6%     0.10s    ¦   ✓ async asyncio.tasks.sleep
-     3     0.10s   87.4%     0.71s    ¦   ✓ async function_b
+     2     0.00s   12.5%     0.10s    ¦   ✓ async asyncio.tasks.sleep
+     3     0.10s   87.5%     0.71s    ¦   ✓ async function_b
      4     0.10s   12.4%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
-     5     0.20s   24.9%     0.20s    ¦   ¦   ✓ async function_c
-     6     0.20s   12.5%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-     7     0.30s   12.4%     0.10s    ¦   ¦   ¦   ✓ async function_d
-     8     0.30s   12.4%     0.10s    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-     9     0.41s   12.5%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
-    10     0.51s   12.6%     0.10s    ¦   ¦   ✓ async function_d
-    11     0.51s   12.6%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
-    12     0.61s   12.4%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
+     5     0.20s   25.1%     0.20s    ¦   ¦   ✓ async function_c
+     6     0.20s   12.4%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+     7     0.30s   12.6%     0.10s    ¦   ¦   ¦   ✓ async function_d
+     8     0.30s   12.5%     0.10s    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+     9     0.41s   12.4%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
+    10     0.51s   12.5%     0.10s    ¦   ¦   ✓ async function_d
+    11     0.51s   12.5%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+    12     0.61s   12.5%     0.10s    ¦   ¦   ✓ async asyncio.tasks.sleep
     13     0.71s   12.5%     0.10s    ¦   ¦   ✓ async function_e
-    14     0.71s   12.5%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+    14     0.71s   12.4%     0.10s    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+

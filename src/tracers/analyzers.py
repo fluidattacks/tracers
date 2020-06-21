@@ -1,4 +1,6 @@
 # Standard library
+import io
+import contextlib
 import operator
 from typing import (
     List,
@@ -8,6 +10,7 @@ from uuid import uuid4
 
 # Local libraries
 from tracers.containers import (
+    DaemonResult,
     Frame,
     LoopSnapshot,
 )
@@ -23,6 +26,9 @@ from tracers.utils import (
     delta,
     divide,
     log,
+)
+from tracers.daemon import (
+    send_result_to_daemon,
 )
 
 Result = NamedTuple('Result', [
@@ -73,6 +79,21 @@ def analyze_loop_snapshots(
 
 
 def analyze_stack(stack: List[Frame]):
+    with io.StringIO() as buffer:
+        with contextlib.redirect_stdout(buffer):
+            _analyze_stack(stack)
+
+        buffer.seek(0)
+        stdout = buffer.read()
+
+    log(stdout)
+    send_result_to_daemon(DaemonResult(
+        stack=stack,
+        stdout=stdout,
+    ))
+
+
+def _analyze_stack(stack: List[Frame]):
     stack_levels: List[int] = \
         list(map(operator.attrgetter('level'), stack))
 
