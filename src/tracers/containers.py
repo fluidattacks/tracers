@@ -18,7 +18,7 @@ DaemonResult = NamedTuple('DaemonResult', [
 
 LoopSnapshot = NamedTuple('LoopSnapshot', [
     ('block_duration_ratio', float),
-    ('wanted_tick_duration', float),
     ('real_tick_duration', float),
     ('timestamp', float),
+    ('wanted_tick_duration', float),
 ])

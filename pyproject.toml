@@ -13,8 +13,12 @@ repository = "https://github.com/kamadorueda/tracers"
 version = "1.0.0"
 
 [tool.poetry.dependencies]
+botocore = "1.17.7"
 more-itertools = "8.4.0"
+pynamodb = "4.3.2"
 python = "^3.7"
+python-dateutil = "2.8.1"
+six = "1.15.0"
 
 [tool.poetry.dev-dependencies]
 prospector = "1.2.0"
