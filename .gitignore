@@ -4,5 +4,5 @@
 /**/dist
 /.data
 /.envrc
-/poetry.lock
+/**/poetry.lock
 /src/sdk/README.md
