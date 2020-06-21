@@ -49,7 +49,7 @@ Result = NamedTuple('Result', [
 
 def analyze_loop_snapshots(
     snapshots: List[LoopSnapshot],
-):
+) -> None:
     top_snapshots: List[LoopSnapshot] = sorted(
         [
             snapshot
@@ -83,7 +83,7 @@ def analyze_loop_snapshots(
             'to improve the overall system throughput')
 
 
-def analyze_stack(stack: List[Frame]):
+def analyze_stack(stack: List[Frame]) -> None:
     with io.StringIO() as buffer:
         with contextlib.redirect_stdout(buffer):
             _analyze_stack(stack)
@@ -98,7 +98,9 @@ def analyze_stack(stack: List[Frame]):
     ))
 
 
-def _analyze_stack(stack: List[Frame]):  # pylint: disable=too-many-locals
+def _analyze_stack(  # pylint: disable=too-many-locals
+    stack: List[Frame],
+) -> None:
     stack_levels: List[int] = \
         list(map(attrgetter('level'), stack))
 
@@ -217,7 +219,7 @@ def _analyze_stack(stack: List[Frame]):  # pylint: disable=too-many-locals
         )
 
 
-def flush_accumulator(accumulator: List[Result]):
+def flush_accumulator(accumulator: List[Result]) -> None:
     if accumulator:
         times: str = f'{len(accumulator)} times: ' * (len(accumulator) > 1)
 

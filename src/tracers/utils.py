@@ -53,5 +53,5 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
         contextvar.reset(token)
 
 
-def log(*parts: Any):
+def log(*parts: Any) -> None:
     print(*parts)
