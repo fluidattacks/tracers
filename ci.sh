@@ -23,25 +23,6 @@ then
   done
 fi
 
-if test "${1:-}" == 'lint' \
-  || test "${1:-}" == 'publish'
-then
-  echo '[INFO] Running code linters'
-  poetry run mypy \
-    --strict \
-    src
-  poetry run prospector \
-    --strictness veryhigh \
-    --with-tool mypy \
-    --without-tool pep257 \
-    src
-  echo '[INFO] Running examples linters'
-  poetry run prospector \
-    --strictness veryhigh \
-    --without-tool pep257 \
-    examples/*.py
-fi
-
 if test "${1:-}" == 'publish'
 then
   version=$(poetry run python -c 'if True:
