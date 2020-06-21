@@ -135,23 +135,22 @@ If you run it, all the functions you decorated will be traced
 and you'll have metrics of the execution flow:
 
 ```
-🛈  Finished transaction: ce72c9dbe3d64e4cb43714fb87738ac4, 3.00 seconds
+🛈  Finished transaction: d5fa597d99904fc0b5f06f2b66d8b0ad, 3.00 seconds
 
-  #    Timestamp      %     Total    Nested Call Chain
+     # Timestamp                Net              Total    Call Chain
 
-     1     0.00s 100.0%     3.00s    ✓ example()
-     2     2.00s  33.4%     1.00s    ¦   ✓ your_business_logic(date: str)
+     1     0.00s     2.00s [ 66.7%]     3.00s [100.0%]    ✓ example
+     2     2.00s     1.00s [ 33.3%]     1.00s [ 33.3%]    ¦   ✓ your_business_logic
 ```
 
 From the output you can conclude:
 - executing function *example* took a total of *3.0* seconds to complete
-- function *example* represents *100%* of your code time
+- function *example* takes *66.7%* of the execution time
+- function *example encloses *100%* of your code time
 - function *example* called function: *your_business_logic*
 - function *your_business_logic* took *1.0* seconds out of the *3.0* seconds
   the function *example* needed to complete
-- function *your_business_logic* represents *33.4%* of your execution time
-- There is *66.6%* of execution time
-  that we've not instrumented... yet!
+- function *your_business_logic* represents *33.3%* of your execution time
 
 Tracing code is not limited to your own code.
 You can trace any **callable object** including **third party packages**,
@@ -188,15 +187,15 @@ The level of detail is up to you!
 ```
 
 ```
-🛈  Finished transaction: 10b3878b12e647c1b326a9c55f954537, 3.00 seconds
+🛈  Finished transaction: b81e4bfbc785458994924b87c6baa668, 3.00 seconds
 
-  #    Timestamp      %     Total    Nested Call Chain
+     # Timestamp                Net              Total    Call Chain
 
-     1     0.00s 100.0%     3.00s    ✓ example()
-     2     0.00s  66.6%     2.00s    ¦   ✓ time.sleep(...)
-     3     2.00s  33.4%     1.00s    ¦   ✓ your_business_logic(date: str)
-     4     2.00s   0.0%     0.00s    ¦   ¦   ✓ dateutil.parser._parser.parse(timestr, parserinfo=None, **kwargs)
-     5     2.00s  33.3%     1.00s    ¦   ¦   ✓ time.sleep(...)
+     1     0.00s     0.00s [  0.0%]     3.00s [100.0%]    ✓ example
+     2     0.00s     2.00s [ 66.6%]     2.00s [ 66.6%]    ¦   ✓ time.sleep
+     3     2.00s     0.00s [  0.0%]     1.00s [ 33.4%]    ¦   ✓ your_business_logic
+     4     2.00s     0.00s [  0.0%]     0.00s [  0.0%]    ¦   ¦   ✓ dateutil.parser._parser.parse
+     5     2.00s     1.00s [ 33.3%]     1.00s [ 33.3%]    ¦   ¦   ✓ time.sleep
 ```
 
 # Installation
