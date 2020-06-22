@@ -1,5 +1,9 @@
 #! /usr/bin/env nix-shell
 #!   nix-shell -i bash
+#!   nix-shell --keep AWS_ACCESS_KEY_ID
+#!   nix-shell --keep AWS_DEFAULT_REGION
+#!   nix-shell --keep AWS_SECRET_ACCESS_KEY
+#!   nix-shell --keep AWS_SESSION_TOKEN
 #!   nix-shell --option restrict-eval false
 #!   nix-shell --option sandbox false
 #!   nix-shell --show-trace
@@ -9,9 +13,6 @@
 source "${srcShellOptions}"
 
 function main {
-  export AWS_ACCESS_KEY_ID="mock"
-  export AWS_SECRET_ACCESS_KEY="mock"
-  export AWS_DEFAULT_REGION="us-east-1"
   export srcExternalDynamoDbLocal
   local data_folder='./.data/dynamo'
   local dynamo_port='8022'
