@@ -3,7 +3,7 @@ import asyncio
 from collections import deque
 from decimal import Decimal
 import json
-from multiprocessing import Process
+from threading import Thread
 from typing import (
     Deque,
 )
@@ -67,4 +67,4 @@ def send_result_to_daemon(result: DaemonResult) -> None:
 
 
 # Side effect: Start an asynchronous daemon server
-Process(daemon=True, target=lambda: asyncio.run(daemon())).start()
+Thread(daemon=True, target=lambda: asyncio.run(daemon())).start()
