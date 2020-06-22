@@ -1,7 +1,9 @@
 /**/*.egg-info
 /**/.mypy_cache
+/**/.terraform
 /**/__pycache__
 /**/dist
+/**/terraform.tfstate
 /.data
 /.envrc
 /**/poetry.lock

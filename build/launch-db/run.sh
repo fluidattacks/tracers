@@ -9,6 +9,9 @@
 source "${srcShellOptions}"
 
 function main {
+  export AWS_ACCESS_KEY_ID="mock"
+  export AWS_SECRET_ACCESS_KEY="mock"
+  export AWS_DEFAULT_REGION="us-east-1"
   export srcExternalDynamoDbLocal
   local data_folder='./.data/dynamo'
   local dynamo_port='8022'
@@ -21,17 +24,20 @@ function main {
   &&  popd \
   &&  {
         java \
-          -delayTransientStatuses \
           -Djava.library.path="${data_folder}/DynamoDBLocal_lib" \
-          -inMemory \
           -jar "${data_folder}/DynamoDBLocal.jar" \
+          -delayTransientStatuses \
+          -inMemory \
           -port "${dynamo_port}" \
           -sharedDb \
         &
         dynamo_pid="$!"
       } \
-  &&  echo '[INFO] Waiting 5 seconds to leave DynamoDB start' \
-  &&  sleep 5 \
+  &&  echo '[INFO] Deploying infrastructure' \
+  &&  pushd infra \
+    &&  terraform init \
+    &&  terraform apply -auto-approve \
+  &&  popd \
   &&  echo "[INFO] DynamoDB is ready and listening on port ${dynamo_port}!" \
   &&  echo "[INFO] Hit Ctrl+C to exit" \
   &&  fg %1 \
