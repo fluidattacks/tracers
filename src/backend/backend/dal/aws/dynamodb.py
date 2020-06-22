@@ -33,12 +33,13 @@ class Item(NamedTuple):
 
 
 @contextlib.asynccontextmanager
-async def _table():
+async def _table() -> aioboto3.dynamodb.table.TableResource:
     async with aioboto3.resource(**CONFIG) as resource:
         yield await resource.Table('main')
 
 
 async def query(
+    *,
     hash_key: str,
     range_key: Optional[str] = None,
     attributes_to_get: Optional[List[str]] = None,
@@ -74,14 +75,17 @@ async def query(
     ]
 
 
-async def put(items: List[Item]):
+async def put(
+    *,
+    items: List[Item],
+) -> None:
     async with _table() as table:
         async with table.batch_writer(
             overwrite_by_pkeys=['hash_key', 'range_key'],
         ) as batch:
             for item in items:
                 await batch.put_item(Item=dict(
-                    hash_key=item['hash_key'],
-                    range_key=item['range_key'],
-                    **item['attributes'],
+                    hash_key=item.hash_key,
+                    range_key=item.range_key,
+                    **item.attributes,
                 ))
