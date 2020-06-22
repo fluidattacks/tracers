@@ -21,8 +21,8 @@ Transaction = NamedTuple('Transaction', [
 async def put(
     *,
     transactions: List[Transaction],
-) -> None:
-    await backend.dal.aws.dynamodb.put(items=[
+) -> bool:
+    success = await backend.dal.aws.dynamodb.put(items=[
         backend.dal.aws.dynamodb.Item(
             attributes=dict(
                 stack=transaction.stack,
@@ -34,3 +34,5 @@ async def put(
         )
         for transaction in transactions
     ])
+
+    return success

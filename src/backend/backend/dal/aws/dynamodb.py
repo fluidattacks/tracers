@@ -11,17 +11,19 @@ from typing import (
 
 # Third party libraries
 import aioboto3
+import aioboto3.dynamodb.table
 from boto3.dynamodb.conditions import (
     Key,
 )
 
 # Constants
 CONFIG = dict(
-    service_name='dynamodb',
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
     aws_session_token=os.environ.get('AWS_SESSION_TOKEN'),
+    endpoint_url='http://localhost:8022',
     region_name=os.environ['AWS_DEFAULT_REGION'],
+    service_name='dynamodb',
 )
 
 
@@ -78,7 +80,9 @@ async def query(
 async def put(
     *,
     items: List[Item],
-) -> None:
+) -> bool:
+    success: bool = True
+
     async with _table() as table:
         async with table.batch_writer(
             overwrite_by_pkeys=['hash_key', 'range_key'],
@@ -89,3 +93,5 @@ async def put(
                     range_key=item.range_key,
                     **item.attributes,
                 ))
+
+    return success

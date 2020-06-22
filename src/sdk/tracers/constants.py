@@ -1,4 +1,3 @@
-# Standard library
 CHAR_SPACE = chr(0x20)
 CHAR_INFO = chr(0x1F6C8) + CHAR_SPACE
 CHAR_CHECK_MARK = chr(0X2713)

@@ -3,6 +3,9 @@
 source 'build/include/generic/shell-options.sh'
 
 function main {
+  export TRACERS_API_TOKEN='token'
+  export TRACERS_ENDPOINT_URL='http://localhost:8000/api'
+
       echo '[INFO] Testing the SDK' \
   && pushd src/sdk \
     &&  echo '[INFO] Running tests' \

@@ -5,6 +5,7 @@ from contextvars import (
     ContextVar,
     Token,
 )
+import sys
 from typing import (
     Any,
     Callable,
@@ -55,3 +56,7 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
 
 def log(*parts: Any) -> None:
     print(*parts)
+
+
+def log_stderr(*parts: Any) -> None:
+    print(*parts, file=sys.stderr)
