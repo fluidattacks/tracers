@@ -16,6 +16,7 @@ aioboto3 = "8.0.3"
 graphene = "2.1.8"
 python = "^3.7"
 starlette = "0.13.4"
+tracers = "*"
 uvicorn = "0.11.5"
 
 [tool.poetry.dev-dependencies]

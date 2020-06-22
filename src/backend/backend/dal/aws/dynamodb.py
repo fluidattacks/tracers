@@ -16,6 +16,9 @@ from boto3.dynamodb.conditions import (
     Key,
 )
 
+# Local libraries
+import backend.utils.apm
+
 # Constants
 CONFIG = dict(
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
@@ -34,12 +37,14 @@ class Item(NamedTuple):
     attributes: Dict[str, Any] = {}
 
 
+@backend.utils.apm.trace()
 @contextlib.asynccontextmanager
 async def _table() -> aioboto3.dynamodb.table.TableResource:
     async with aioboto3.resource(**CONFIG) as resource:
         yield await resource.Table('main')
 
 
+@backend.utils.apm.trace()
 async def query(
     *,
     hash_key: str,
@@ -77,6 +82,7 @@ async def query(
     ]
 
 
+@backend.utils.apm.trace()
 async def put(
     *,
     items: List[Item],

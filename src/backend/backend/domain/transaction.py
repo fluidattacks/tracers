@@ -6,6 +6,7 @@ from typing import (
 )
 
 # Local libraries
+import backend.utils.apm
 import backend.dal.aws.dynamodb
 
 # Containers
@@ -18,6 +19,7 @@ Transaction = NamedTuple('Transaction', [
 ])
 
 
+@backend.utils.apm.trace()
 async def put(
     *,
     transactions: List[Transaction],

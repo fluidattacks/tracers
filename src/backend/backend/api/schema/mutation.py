@@ -9,6 +9,7 @@ import graphene
 
 # Local libraries
 import backend.domain.transaction
+import backend.utils.apm
 
 
 class TransactionInput(graphene.InputObjectType):
@@ -25,6 +26,7 @@ class PutTransaction(graphene.Mutation):  # type: ignore
 
     success = graphene.Boolean()
 
+    @backend.utils.apm.trace()
     async def mutate(
         self,
         info: Any,
