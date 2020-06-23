@@ -91,13 +91,13 @@ def analyze_stack(stack: List[Frame]) -> None:
         buffer.seek(0)
         stdout = buffer.read()
 
-    log(stdout)
     send_result_to_daemon(
         result=DaemonResult(
-            stack=stack,
+            stack=tuple(stack),
             stdout=stdout,
         ),
     )
+    log(stdout)
 
 
 def _analyze_stack(  # pylint: disable=too-many-locals

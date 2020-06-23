@@ -1,7 +1,7 @@
 # Standard library
 from typing import (
-    List,
     NamedTuple,
+    Tuple,
 )
 
 Frame = NamedTuple('Frame', [
@@ -12,7 +12,7 @@ Frame = NamedTuple('Frame', [
 ])
 
 DaemonResult = NamedTuple('DaemonResult', [
-    ('stack', List[Frame]),
+    ('stack', Tuple[Frame, ...]),
     ('stdout', str),
 ])
 
