@@ -14,7 +14,7 @@ version = "1.0.0"
 
 [tool.poetry.dependencies]
 aioboto3 = "8.0.3"
-aiogqlc = "1.0.4"
+aiogqlc = "1.0.5"
 more-itertools = "8.4.0"
 python = "^3.7"
 

@@ -5,10 +5,13 @@ from decimal import Decimal
 import json
 from threading import Thread
 from typing import (
+    Any,
     Deque,
+    Dict,
 )
 
 # Third party libraries
+import aiohttp
 from more_itertools import iter_except
 
 # Local libraries
@@ -27,43 +30,61 @@ _RESULTS_QUEUE: Deque[DaemonResult] = deque()
 
 
 async def daemon() -> None:
-    if GRAPHQL_CLIENT:
-        while True:
+    while True:
+        if GRAPHQL_CLIENT:
             await asyncio.sleep(1.0)
-            await GRAPHQL_CLIENT.execute(
-                query="""
-                    mutation PutTransaction(
-                        $transactions: [TransactionInput]
-                    ) {
-                        putTransaction(
-                            transactions: $transactions
+
+            results = tuple(iter_except(_RESULTS_QUEUE.pop, IndexError))
+
+            if results:
+                send_result_to_server(
+                    query="""
+                        mutation(
+                            $transactions: [TransactionInput!]!
                         ) {
-                            success
+                            putTransaction(
+                                transactions: $transactions
+                            ) {
+                                success
+                            }
                         }
-                    }
                     """,
-                variables=dict(
-                    transactions=[
-                        dict(
-                            initiator=result.stack[0].function,
-                            stack=json.dumps(result.stack),
-                            stdout=result.stdout,
-                            tenantId='123',
-                            totalTime=Decimal(delta(
-                                result.stack[0].timestamp,
-                                result.stack[-1].timestamp,
-                            )),
-                        )
-                        for result in iter_except(
-                            _RESULTS_QUEUE.pop, IndexError,
-                        )
-                    ]
-                ),
-            )
+                    variables=dict(
+                        transactions=[
+                            dict(
+                                initiator=result.stack[0].function,
+                                stack=json.dumps(result.stack),
+                                stdout=result.stdout,
+                                tenantId='123',
+                                totalTime=str(delta(
+                                    result.stack[0].timestamp,
+                                    result.stack[-1].timestamp,
+                                )),
+                            )
+                            for result in results
+                        ],
+                    ),
+                )
 
 
 def send_result_to_daemon(result: DaemonResult) -> None:
     _RESULTS_QUEUE.appendleft(result)
+
+
+async def send_result_to_server(query: str, variables: Dict[str, Any]) -> bool:
+    success: bool
+
+    try:
+        await GRAPHQL_CLIENT.execute(
+            query=query,
+            variables=variables
+        )
+    except aiohttp.ClientError:
+        success = False
+    else:
+        success = True
+
+    return success
 
 
 # Side effect: Start an asynchronous daemon server

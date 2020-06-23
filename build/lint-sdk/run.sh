@@ -6,6 +6,7 @@ function main {
       echo '[INFO] Linting SDK' \
   && pushd src/sdk \
     &&  poetry run mypy \
+          --ignore-missing-imports \
           --strict \
           . \
     &&  poetry run prospector \

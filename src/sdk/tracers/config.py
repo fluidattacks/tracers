@@ -1,6 +1,7 @@
 # Standard library
 import os
 from typing import (
+    NamedTuple,
     Optional,
 )
 
@@ -11,7 +12,7 @@ from tracers.utils import (
 
 
 def _get(var_name: str) -> Optional[str]:
-    var_value: str = os.environ.get(var_name)
+    var_value: Optional[str] = os.environ.get(var_name)
 
     if var_name in [
         'TRACERS_API_TOKEN',
@@ -24,6 +25,12 @@ def _get(var_name: str) -> Optional[str]:
 
 
 # Runtime constants
-class Config:
-    api_token: str = _get('TRACERS_API_TOKEN')
-    endpoint_url: str = _get('TRACERS_ENDPOINT_URL')
+Config = NamedTuple('Config', [
+    ('api_token', Optional[str]),
+    ('endpoint_url', Optional[str]),
+])
+
+CONFIG = Config(
+    api_token=_get('TRACERS_API_TOKEN'),
+    endpoint_url=_get('TRACERS_ENDPOINT_URL'),
+)
