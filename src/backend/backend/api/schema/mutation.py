@@ -8,13 +8,14 @@ from typing import (
 import graphene
 
 # Local libraries
+import backend.api.schema.types
 import backend.domain.transaction
 import backend.utils.apm
 
 
 class TransactionInput(graphene.InputObjectType):
     initiator = graphene.String()
-    stack = graphene.JSONString()
+    stack = backend.api.schema.types.JSONString()
     stdout = graphene.String()
     tenant_id = graphene.ID()
     total_time = graphene.Decimal()
