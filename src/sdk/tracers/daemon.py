@@ -4,9 +4,8 @@ from collections import deque
 import json
 from threading import Thread
 from typing import (
-    Any,
     Deque,
-    Dict,
+    Tuple,
 )
 
 # Third party libraries
@@ -23,6 +22,7 @@ from tracers.graphql import (
 )
 from tracers.utils import (
     delta,
+    log_stderr,
 )
 
 # Private constants
@@ -30,42 +30,20 @@ _RESULTS_QUEUE: Deque[DaemonResult] = deque()
 
 
 async def daemon() -> None:
-    while True:
-        if GRAPHQL_CLIENT:
-            await asyncio.sleep(1.0)
+    while await asyncio.sleep(1.0, result=True):
+        results = tuple(iter_except(_RESULTS_QUEUE.pop, IndexError))
+        results_len = len(results)
 
-            results = tuple(iter_except(_RESULTS_QUEUE.pop, IndexError))
+        if GRAPHQL_CLIENT and results:
+            success, msg = await send_results_to_server(
+                client=GRAPHQL_CLIENT,
+                results=results,
+            )
 
-            if results:
-                send_result_to_server(
-                    client=GRAPHQL_CLIENT,
-                    query="""
-                        mutation(
-                            $transactions: [TransactionInput!]!
-                        ) {
-                            putTransaction(
-                                transactions: $transactions
-                            ) {
-                                success
-                            }
-                        }
-                    """,
-                    variables=dict(
-                        transactions=[
-                            dict(
-                                initiator=result.stack[0].function,
-                                stack=json.dumps(result.stack),
-                                stdout=result.stdout,
-                                tenantId='123',
-                                totalTime=str(delta(
-                                    result.stack[0].timestamp,
-                                    result.stack[-1].timestamp,
-                                )),
-                            )
-                            for result in results
-                        ],
-                    ),
-                )
+            if success:
+                log_stderr(f'[DAEMON] Uploaded transactions: {results_len}')
+            else:
+                log_stderr(f'[DAEMON] Error uploading: {msg}')
 
 
 def send_result_to_daemon(
@@ -75,25 +53,48 @@ def send_result_to_daemon(
     _RESULTS_QUEUE.appendleft(result)
 
 
-async def send_result_to_server(
+async def send_results_to_server(
     *,
     client: aiogqlc.GraphQLClient,
-    query: str,
-    variables: Dict[str, Any],
-) -> bool:
-    success: bool
-
+    results: Tuple[DaemonResult, ...],
+) -> Tuple[bool, str]:
     try:
         await client.execute(
-            query=query,
-            variables=variables
+            query="""
+                mutation(
+                    $transactions: [TransactionInput!]!
+                ) {
+                    putTransaction(
+                        transactions: $transactions
+                    ) {
+                        success
+                    }
+                }
+            """,
+            variables=dict(
+                transactions=[
+                    dict(
+                        initiator=result.stack[0].function,
+                        stack=json.dumps(result.stack),
+                        stdout=result.stdout,
+                        tenantId='123',
+                        totalTime=str(delta(
+                            result.stack[0].timestamp,
+                            result.stack[-1].timestamp,
+                        )),
+                    )
+                    for result in results
+                ],
+            ),
         )
-    except aiohttp.ClientError:
-        success = False
+    except aiohttp.ClientError as exception:
+        msg: str = str(exception)
+        success: bool = False
     else:
+        msg = ''
         success = True
 
-    return success
+    return success, msg
 
 
 # Side effect: Start an asynchronous daemon server
