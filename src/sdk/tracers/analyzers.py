@@ -92,10 +92,12 @@ def analyze_stack(stack: List[Frame]) -> None:
         stdout = buffer.read()
 
     log(stdout)
-    send_result_to_daemon(DaemonResult(
-        stack=stack,
-        stdout=stdout,
-    ))
+    send_result_to_daemon(
+        result=DaemonResult(
+            stack=stack,
+            stdout=stdout,
+        ),
+    )
 
 
 def _analyze_stack(  # pylint: disable=too-many-locals

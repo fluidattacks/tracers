@@ -1,7 +1,6 @@
 # Standard library
 import asyncio
 from collections import deque
-from decimal import Decimal
 import json
 from threading import Thread
 from typing import (
@@ -12,6 +11,7 @@ from typing import (
 
 # Third party libraries
 import aiohttp
+import aiogqlc
 from more_itertools import iter_except
 
 # Local libraries
@@ -38,6 +38,7 @@ async def daemon() -> None:
 
             if results:
                 send_result_to_server(
+                    client=GRAPHQL_CLIENT,
                     query="""
                         mutation(
                             $transactions: [TransactionInput!]!
@@ -67,15 +68,23 @@ async def daemon() -> None:
                 )
 
 
-def send_result_to_daemon(result: DaemonResult) -> None:
+def send_result_to_daemon(
+    *,
+    result: DaemonResult,
+) -> None:
     _RESULTS_QUEUE.appendleft(result)
 
 
-async def send_result_to_server(query: str, variables: Dict[str, Any]) -> bool:
+async def send_result_to_server(
+    *,
+    client: aiogqlc.GraphQLClient,
+    query: str,
+    variables: Dict[str, Any],
+) -> bool:
     success: bool
 
     try:
-        await GRAPHQL_CLIENT.execute(
+        await client.execute(
             query=query,
             variables=variables
         )
@@ -88,4 +97,8 @@ async def send_result_to_server(query: str, variables: Dict[str, Any]) -> bool:
 
 
 # Side effect: Start an asynchronous daemon server
-Thread(daemon=True, target=lambda: asyncio.run(daemon())).start()
+Thread(
+    daemon=True,
+    name='Tracers Daemon',
+    target=lambda: asyncio.run(daemon()),
+).start()

@@ -1,14 +1,10 @@
 # Standard library
-import json
 from typing import (
-    Any,
-    Dict,
     Optional,
 )
 
 # Third party libraries
 from aiogqlc import GraphQLClient
-import aiohttp
 
 # Local libraries
 from tracers.config import (
