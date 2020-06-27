@@ -1,11 +1,13 @@
 # Standard library
 import asyncio
 import contextlib
+import contextvars
 import functools
 import time
 from typing import (
     Any,
     Callable,
+    List,
     Optional,
     Tuple,
 )
@@ -24,12 +26,11 @@ from tracers.containers import (
 )
 from tracers.contextvars import (
     LEVEL,
-    LOOP_SNAPSHOTS,
-    reset_all as reset_all_contextvars,
     STACK,
     TRACING,
 )
 from tracers.utils import (
+    delta,
     divide,
     get_function_id,
     increase_counter,
@@ -39,26 +40,25 @@ from tracers.utils import (
 FunctionWrapper = Callable[[Callable[..., Any]], Callable[..., Any]]
 
 
-def measure_loop_skew(clock_id: int) -> None:
+def measure_loop_skew(snapshots: List[LoopSnapshot], clock_id: int) -> None:
 
     def callback_handler(
         wanted_tick_duration: float,
         start_timestamp: float,
     ) -> None:
-        timestamp: float = time.clock_gettime(clock_id)
-        real_tick_duration: float = timestamp - start_timestamp
-        block_duration_ratio: float = divide(
-            numerator=real_tick_duration,
-            denominator=wanted_tick_duration,
-            on_zero_denominator=1.0,
-        )
+        real_tick_duration: float = \
+            delta(start_timestamp, time.clock_gettime(clock_id))
 
-        LOOP_SNAPSHOTS.set(LOOP_SNAPSHOTS.get() + (LoopSnapshot(
-            block_duration_ratio=block_duration_ratio,
-            wanted_tick_duration=wanted_tick_duration,
+        snapshots.append(LoopSnapshot(
+            block_duration_ratio=divide(
+                numerator=real_tick_duration,
+                denominator=wanted_tick_duration,
+                on_zero_denominator=1.0,
+            ),
             real_tick_duration=real_tick_duration,
             timestamp=start_timestamp,
-        ),))
+            wanted_tick_duration=wanted_tick_duration,
+        ))
 
         if LEVEL.get() == 1:
             schedule_callback(wanted_tick_duration)
@@ -73,14 +73,13 @@ def measure_loop_skew(clock_id: int) -> None:
             loop.call_later(
                 wanted_tick_duration,
                 callback_handler,
-                *callback_handler_args
+                *callback_handler_args,
             )
 
-    if LEVEL.get() == 1:
-        schedule_callback(LOOP_CHECK_INTERVAL)
+    schedule_callback(LOOP_CHECK_INTERVAL)
 
 
-def record_event(
+def record(
     clock_id: int,
     event: str,
     function: Callable[..., Any],
@@ -99,64 +98,78 @@ def _get_wrapper(  # noqa: MC001
     clock_id: int = time.CLOCK_MONOTONIC,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
-    analyze_loop_snapshots,
-    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
-    analyze_stack,
 ) -> FunctionWrapper:
 
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
 
-        if not do_trace or not TRACING.get():
-
-            # No overhead is introduced
-            wrapper = function
-
-            # Any downstream tracer is also disabled
-            TRACING.set(False)
-
-        elif asyncio.iscoroutinefunction(function):
+        if asyncio.iscoroutinefunction(function):
 
             @functools.wraps(function)
-            async def wrapper(*args: Any, **kwargs: Any) -> Any:
-                if LEVEL.get() == 0:
-                    reset_all_contextvars()
+            async def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
+                if do_trace and TRACING.get():
+                    with increase_counter(LEVEL):
+                        if LEVEL.get() == 1:
+                            snapshots: List[LoopSnapshot] = []
+                            measure_loop_skew(snapshots, clock_id)
 
-                with increase_counter(LEVEL):
-                    measure_loop_skew(clock_id)
-                    record_event(clock_id, 'call', function, function_name)
+                        record(clock_id, 'call', function, function_name)
+                        result = await function(*args, **kwargs)
+                        record(clock_id, 'return', function, function_name)
+
+                        if LEVEL.get() == 1:
+                            analyze_stack()
+                            analyze_loop_snapshots(tuple(snapshots))
+                else:
+                    # Disable downstream tracers
+                    TRACING.set(False)
+
+                    # No overhead is introduced!
                     result = await function(*args, **kwargs)
-                    record_event(clock_id, 'return', function, function_name)
-
-                if LEVEL.get() == 0:
-                    stack_analyzer(STACK.get())
-                    loop_snapshots_analyzer(LOOP_SNAPSHOTS.get())
 
                 return result
 
         elif callable(function):
 
             @functools.wraps(function)
-            def wrapper(*args: Any, **kwargs: Any) -> Any:
-                if LEVEL.get() == 0:
-                    reset_all_contextvars()
+            def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
 
-                with increase_counter(LEVEL):
-                    record_event(clock_id, 'call', function, function_name)
-                    result = function(*args, **kwargs)
-                    record_event(clock_id, 'return', function, function_name)
+                @functools.wraps(function)
+                def wrapper(*args: Any, **kwargs: Any) -> Any:
+                    if do_trace and TRACING.get():
+                        with increase_counter(LEVEL):
+                            record(clock_id, 'call', function, function_name)
+                            result = function(*args, **kwargs)
+                            record(clock_id, 'return', function, function_name)
+
+                            if LEVEL.get() == 1:
+                                analyze_stack()
+                    else:
+                        # Disable downstream tracers
+                        TRACING.set(False)
+
+                        # No overhead is introduced!
+                        result = function(*args, **kwargs)
+
+                    return result
 
                 if LEVEL.get() == 0:
-                    stack_analyzer(STACK.get())
+                    result = contextvars.copy_context().run(
+                        wrapper, *args, **kwargs
+                    )
+                else:
+                    result = wrapper(*args, **kwargs)
 
                 return result
 
         else:
 
             # We were not able to wrap this object
-            wrapper = function
+            raise TypeError(
+                f'Excpected callable or coroutine function, '
+                f'got: {type(function)}'
+            )
 
-        return wrapper
+        return isolated_wrapper
 
     return decorator
 
@@ -165,17 +178,11 @@ def trace_process(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
-    analyze_loop_snapshots,
-    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
-    analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
         clock_id=time.CLOCK_PROCESS_CPUTIME_ID,
         do_trace=do_trace,
         function_name=function_name,
-        loop_snapshots_analyzer=loop_snapshots_analyzer,
-        stack_analyzer=stack_analyzer,
     )
 
 
@@ -183,17 +190,11 @@ def trace_thread(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
-    analyze_loop_snapshots,
-    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
-    analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
         clock_id=time.CLOCK_THREAD_CPUTIME_ID,
         do_trace=do_trace,
         function_name=function_name,
-        loop_snapshots_analyzer=loop_snapshots_analyzer,
-        stack_analyzer=stack_analyzer,
     )
 
 
@@ -201,17 +202,11 @@ def trace_monotonic(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
-    analyze_loop_snapshots,
-    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
-    analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
         clock_id=time.CLOCK_MONOTONIC,
         do_trace=do_trace,
         function_name=function_name,
-        loop_snapshots_analyzer=loop_snapshots_analyzer,
-        stack_analyzer=stack_analyzer,
     )
 
 
@@ -220,16 +215,10 @@ def trace(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
-    analyze_loop_snapshots,
-    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
-    analyze_stack,
 ) -> FunctionWrapper:
     wrapper: FunctionWrapper = trace_monotonic(
         do_trace=do_trace,
         function_name=function_name,
-        loop_snapshots_analyzer=loop_snapshots_analyzer,
-        stack_analyzer=stack_analyzer,
     )
 
     if function:

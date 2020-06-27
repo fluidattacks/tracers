@@ -3,11 +3,11 @@
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     2.00s [ 66.7%]     3.00s [100.0%]    ✓ example
-     2     2.00s     1.00s [ 33.3%]     1.00s [ 33.3%]    ¦   ✓ custom!
+     1     0.00s     2.00s [ 66.6%]     3.00s [100.0%]    ✓ example
+     2     2.00s     1.00s [ 33.4%]     1.00s [ 33.4%]    ¦   ✓ custom!
 
            Count                Net              Total    Function
 
-               1     2.00s [ 66.7%]     3.00s [100.0%]    ✓ example
-               1     1.00s [ 33.3%]     1.00s [ 33.3%]    ✓ custom!
+               1     2.00s [ 66.6%]     3.00s [100.0%]    ✓ example
+               1     1.00s [ 33.4%]     1.00s [ 33.4%]    ✓ custom!
 

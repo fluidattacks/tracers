@@ -3,9 +3,11 @@
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     0.81s [100.0%]     0.81s [100.0%]    ✓ async function_a
+     1     0.00s     0.71s [ 87.5%]     0.81s [100.0%]    ✓ async function_a
+     2     0.00s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ✓ async asyncio.tasks.sleep
 
            Count                Net              Total    Function
 
-               1     0.81s [100.0%]     0.81s [100.0%]    ✓ async function_a
+               1     0.71s [ 87.5%]     0.81s [100.0%]    ✓ async function_a
+               1     0.10s [ 12.5%]     0.10s [ 12.5%]    ✓ async asyncio.tasks.sleep
 

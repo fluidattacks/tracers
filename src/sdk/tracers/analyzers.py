@@ -25,6 +25,9 @@ from tracers.constants import (
     CHAR_SUPERSCRIPT_ONE,
     LOOP_SKEW_TOLERANCE,
 )
+from tracers.contextvars import (
+    STACK,
+)
 from tracers.utils import (
     delta,
     divide,
@@ -83,7 +86,9 @@ def analyze_loop_snapshots(
             'to improve the overall system throughput')
 
 
-def analyze_stack(stack: Tuple[Frame, ...]) -> None:
+def analyze_stack() -> None:
+    stack: Tuple[Frame, ...] = STACK.get()
+
     with io.StringIO() as buffer:
         with contextlib.redirect_stdout(buffer):
             _analyze_stack(stack)
