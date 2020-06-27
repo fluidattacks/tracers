@@ -76,7 +76,6 @@ async def send_results_to_server(
                     dict(
                         initiator=result.stack[0].function,
                         stack=json.dumps(result.stack),
-                        stdout=result.stdout,
                         tenantId='123',
                         totalTime=str(delta(
                             result.stack[0].timestamp,

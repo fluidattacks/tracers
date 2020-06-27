@@ -21,6 +21,7 @@ from tracers.constants import (
     LOOP_CHECK_INTERVAL,
 )
 from tracers.containers import (
+    DaemonResult,
     Frame,
     LoopSnapshot,
 )
@@ -28,6 +29,9 @@ from tracers.contextvars import (
     LEVEL,
     STACK,
     TRACING,
+)
+from tracers.daemon import (
+    send_result_to_daemon,
 )
 from tracers.utils import (
     delta,
@@ -117,8 +121,14 @@ def _get_wrapper(  # noqa: MC001
                         record(clock_id, 'return', function, function_name)
 
                         if LEVEL.get() == 1:
-                            analyze_stack()
+                            stack = STACK.get()
+                            analyze_stack(stack)
                             analyze_loop_snapshots(tuple(snapshots))
+                            send_result_to_daemon(
+                                result=DaemonResult(
+                                    stack=stack,
+                                ),
+                            )
                 else:
                     # Disable downstream tracers
                     TRACING.set(False)
@@ -142,7 +152,13 @@ def _get_wrapper(  # noqa: MC001
                             record(clock_id, 'return', function, function_name)
 
                             if LEVEL.get() == 1:
-                                analyze_stack()
+                                stack = STACK.get()
+                                analyze_stack(stack)
+                                send_result_to_daemon(
+                                    result=DaemonResult(
+                                        stack=stack,
+                                    ),
+                                )
                     else:
                         # Disable downstream tracers
                         TRACING.set(False)

@@ -13,7 +13,6 @@ Frame = NamedTuple('Frame', [
 
 DaemonResult = NamedTuple('DaemonResult', [
     ('stack', Tuple[Frame, ...]),
-    ('stdout', str),
 ])
 
 LoopSnapshot = NamedTuple('LoopSnapshot', [

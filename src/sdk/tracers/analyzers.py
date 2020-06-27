@@ -1,6 +1,4 @@
 # Standard library
-import io
-import contextlib
 from itertools import groupby
 from operator import (
     attrgetter,
@@ -13,7 +11,6 @@ from typing import (
 
 # Local libraries
 from tracers.containers import (
-    DaemonResult,
     Frame,
     LoopSnapshot,
 )
@@ -25,16 +22,10 @@ from tracers.constants import (
     CHAR_SUPERSCRIPT_ONE,
     LOOP_SKEW_TOLERANCE,
 )
-from tracers.contextvars import (
-    STACK,
-)
 from tracers.utils import (
     delta,
     divide,
     log,
-)
-from tracers.daemon import (
-    send_result_to_daemon,
 )
 
 Result = NamedTuple('Result', [
@@ -86,26 +77,7 @@ def analyze_loop_snapshots(
             'to improve the overall system throughput')
 
 
-def analyze_stack() -> None:
-    stack: Tuple[Frame, ...] = STACK.get()
-
-    with io.StringIO() as buffer:
-        with contextlib.redirect_stdout(buffer):
-            _analyze_stack(stack)
-
-        buffer.seek(0)
-        stdout = buffer.read()
-
-    send_result_to_daemon(
-        result=DaemonResult(
-            stack=stack,
-            stdout=stdout,
-        ),
-    )
-    log(stdout)
-
-
-def _analyze_stack(  # pylint: disable=too-many-locals
+def analyze_stack(  # pylint: disable=too-many-locals
     stack: Tuple[Frame, ...],
 ) -> None:
     stack_levels: Tuple[int, ...] = \
