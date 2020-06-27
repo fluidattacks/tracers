@@ -4,8 +4,6 @@ from contextvars import (
 )
 from typing import (
     Any,
-    Callable,
-    List,
     Tuple,
 )
 
@@ -17,28 +15,28 @@ from tracers.containers import (
 
 LEVEL: ContextVar[int] = \
     ContextVar('LEVEL', default=0)
-LOOP_SNAPSHOTS: ContextVar[List[LoopSnapshot]] = \
+LOOP_SNAPSHOTS: ContextVar[Tuple[LoopSnapshot, ...]] = \
     ContextVar('LOOP_SNAPSHOTS')
-STACK: ContextVar[List[Frame]] = \
+STACK: ContextVar[Tuple[Frame, ...]] = \
     ContextVar('STACK')
 TRACING: ContextVar[bool] = \
     ContextVar('TRACING', default=True)
 
-RESETABLE: Tuple[Tuple[ContextVar[Any], Callable[[], Any]], ...] = (
-    (LEVEL, lambda: 0),
-    (LOOP_SNAPSHOTS, lambda: []),
-    (STACK, lambda: []),
+RESETABLE: Tuple[Tuple[ContextVar[Any], Any], ...] = (
+    (LEVEL, 0),
+    (LOOP_SNAPSHOTS, ()),
+    (STACK, ()),
 )
 
 
 def reset_all() -> None:
-    for var, default_value_creator in RESETABLE:
-        reset_one(var, default_value_creator)
+    for var, default_value in RESETABLE:
+        reset_one(var, default_value)
 
 
 def reset_one(
     contextvar: ContextVar[Any],
-    default_value_creator: Callable[[], Any],
+    default_value: Any,
 ) -> None:
     obj = contextvar.get(None)
 
@@ -56,4 +54,4 @@ def reset_one(
     del obj
 
     # Re-initialize to its default value
-    contextvar.set(default_value_creator())
+    contextvar.set(default_value)

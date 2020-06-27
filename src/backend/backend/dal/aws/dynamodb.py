@@ -4,9 +4,9 @@ import os
 from typing import (
     Any,
     Dict,
-    List,
     NamedTuple,
     Optional,
+    Tuple,
 )
 
 # Third party libraries
@@ -49,9 +49,9 @@ async def query(
     *,
     hash_key: str,
     range_key: Optional[str] = None,
-    attributes_to_get: Optional[List[str]] = None,
-) -> List[Item]:
-    results: List[object] = []
+    attributes_to_get: Optional[Tuple[str, ...]] = None,
+) -> Tuple[Item, ...]:
+    results: Tuple[object, ...] = []
 
     condition = Key('hash_key').eq(hash_key)
     if range_key:
@@ -72,20 +72,20 @@ async def query(
             result = await table.query(**params)
             results.extend(result['Items'])
 
-    return [
+    return tuple(
         Item(
             hash_key=result.pop('hash_key'),
             range_key=result.pop('range_key'),
             attributes=result,
         )
         for result in result['Items']
-    ]
+    )
 
 
 @backend.utils.apm.trace()
 async def put(
     *,
-    items: List[Item],
+    items: Tuple[Item, ...],
 ) -> bool:
     success: bool = True
 

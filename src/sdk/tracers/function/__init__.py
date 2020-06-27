@@ -6,7 +6,6 @@ import time
 from typing import (
     Any,
     Callable,
-    List,
     Optional,
     Tuple,
 )
@@ -54,12 +53,12 @@ def measure_loop_skew(clock_id: int) -> None:
             on_zero_denominator=1.0,
         )
 
-        LOOP_SNAPSHOTS.get().append(LoopSnapshot(
+        LOOP_SNAPSHOTS.set(LOOP_SNAPSHOTS.get() + (LoopSnapshot(
             block_duration_ratio=block_duration_ratio,
             wanted_tick_duration=wanted_tick_duration,
             real_tick_duration=real_tick_duration,
             timestamp=start_timestamp,
-        ))
+        ),))
 
         if LEVEL.get() == 1:
             schedule_callback(wanted_tick_duration)
@@ -87,12 +86,12 @@ def record_event(
     function: Callable[..., Any],
     function_name: str = '',
 ) -> None:
-    STACK.get().append(Frame(
+    STACK.set(STACK.get() + (Frame(
         event=event,
         function=function_name or get_function_id(function),
         level=LEVEL.get(),
         timestamp=time.clock_gettime(clock_id),
-    ))
+    ),))
 
 
 def _get_wrapper(  # noqa: MC001
@@ -100,9 +99,9 @@ def _get_wrapper(  # noqa: MC001
     clock_id: int = time.CLOCK_MONOTONIC,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[List[LoopSnapshot]], None] =
+    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
     analyze_loop_snapshots,
-    stack_analyzer: Callable[[List[Frame]], None] =
+    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
     analyze_stack,
 ) -> FunctionWrapper:
 
@@ -166,9 +165,9 @@ def trace_process(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[List[LoopSnapshot]], None] =
+    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
     analyze_loop_snapshots,
-    stack_analyzer: Callable[[List[Frame]], None] =
+    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
     analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
@@ -184,9 +183,9 @@ def trace_thread(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[List[LoopSnapshot]], None] =
+    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
     analyze_loop_snapshots,
-    stack_analyzer: Callable[[List[Frame]], None] =
+    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
     analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
@@ -202,9 +201,9 @@ def trace_monotonic(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[List[LoopSnapshot]], None] =
+    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
     analyze_loop_snapshots,
-    stack_analyzer: Callable[[List[Frame]], None] =
+    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
     analyze_stack,
 ) -> FunctionWrapper:
     return _get_wrapper(
@@ -221,9 +220,9 @@ def trace(
     *,
     do_trace: bool = True,
     function_name: str = '',
-    loop_snapshots_analyzer: Callable[[List[LoopSnapshot]], None] =
+    loop_snapshots_analyzer: Callable[[Tuple[LoopSnapshot, ...]], None] =
     analyze_loop_snapshots,
-    stack_analyzer: Callable[[List[Frame]], None] =
+    stack_analyzer: Callable[[Tuple[Frame, ...]], None] =
     analyze_stack,
 ) -> FunctionWrapper:
     wrapper: FunctionWrapper = trace_monotonic(

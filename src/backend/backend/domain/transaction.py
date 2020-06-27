@@ -4,8 +4,8 @@ from decimal import (
 )
 from typing import (
     Any,
-    List,
     NamedTuple,
+    Tuple,
 )
 
 # Local libraries
@@ -15,7 +15,7 @@ import backend.dal.aws.dynamodb
 # Containers
 Transaction = NamedTuple('Transaction', [
     ('initiator', str),
-    ('stack', List[Any]),
+    ('stack', Tuple[Any, ...]),
     ('stdout', str),
     ('tenant_id', str),
     ('total_time', float),
@@ -25,7 +25,7 @@ Transaction = NamedTuple('Transaction', [
 @backend.utils.apm.trace()
 async def put(
     *,
-    transactions: List[Transaction],
+    transactions: Tuple[Transaction, ...],
 ) -> bool:
     success = await backend.dal.aws.dynamodb.put(items=[
         backend.dal.aws.dynamodb.Item(

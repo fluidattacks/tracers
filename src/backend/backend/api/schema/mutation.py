@@ -1,7 +1,7 @@
 # Standard library
 from typing import (
     Any,
-    List,
+    Tuple,
 )
 
 # Third party libraries
@@ -31,7 +31,7 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     async def mutate(
         self,
         info: Any,
-        transactions: List[TransactionInput],
+        transactions: Tuple[TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put(
             transactions=transactions,

@@ -7,8 +7,8 @@ from operator import (
     itemgetter,
 )
 from typing import (
-    List,
     NamedTuple,
+    Tuple,
 )
 
 # Local libraries
@@ -48,9 +48,9 @@ Result = NamedTuple('Result', [
 
 
 def analyze_loop_snapshots(
-    snapshots: List[LoopSnapshot],
+    snapshots: Tuple[LoopSnapshot, ...],
 ) -> None:
-    top_snapshots: List[LoopSnapshot] = sorted(
+    top_snapshots: Tuple[LoopSnapshot, ...] = tuple(sorted(
         [
             snapshot
             for snapshot in snapshots
@@ -58,7 +58,7 @@ def analyze_loop_snapshots(
         ],
         key=attrgetter('real_tick_duration'),
         reverse=True,
-    )
+    ))
 
     if top_snapshots:
         log()
@@ -83,7 +83,7 @@ def analyze_loop_snapshots(
             'to improve the overall system throughput')
 
 
-def analyze_stack(stack: List[Frame]) -> None:
+def analyze_stack(stack: Tuple[Frame, ...]) -> None:
     with io.StringIO() as buffer:
         with contextlib.redirect_stdout(buffer):
             _analyze_stack(stack)
@@ -93,7 +93,7 @@ def analyze_stack(stack: List[Frame]) -> None:
 
     send_result_to_daemon(
         result=DaemonResult(
-            stack=tuple(stack),
+            stack=stack,
             stdout=stdout,
         ),
     )
@@ -101,10 +101,10 @@ def analyze_stack(stack: List[Frame]) -> None:
 
 
 def _analyze_stack(  # pylint: disable=too-many-locals
-    stack: List[Frame],
+    stack: Tuple[Frame, ...],
 ) -> None:
-    stack_levels: List[int] = \
-        list(map(attrgetter('level'), stack))
+    stack_levels: Tuple[int, ...] = \
+        tuple(map(attrgetter('level'), stack))
 
     total_time_seconds: float = \
         delta(stack[0].timestamp, stack[-1].timestamp)
@@ -116,13 +116,13 @@ def _analyze_stack(  # pylint: disable=too-many-locals
     log()
 
     counter: int = 0
-    results: List[Result] = []
-    accumulator: List[Result] = []
+    results: Tuple[Result, ...] = ()
+    accumulator: Tuple[Result, ...] = ()
     for index, frame in enumerate(stack):
         if frame.event == 'call':
             counter += 1
 
-            frame_childs: List[Frame] = \
+            frame_childs: Tuple[Frame, ...] = \
                 stack[index:stack_levels.index(frame.level, index + 1) + 1]
 
             raw_time_seconds: float = \
@@ -135,7 +135,7 @@ def _analyze_stack(  # pylint: disable=too-many-locals
                     if x.level == frame.level + 1
                 ])
 
-            results.append(Result(
+            results += (Result(
                 counter=counter,
                 function=frame.function,
                 indentation=(
@@ -156,24 +156,24 @@ def _analyze_stack(  # pylint: disable=too-many-locals
                     on_zero_denominator=1.0,
                 ),
                 raw_time_seconds=raw_time_seconds,
-            ))
+            ),)
 
     if results:
-        accumulator.append(results[0])
-        flush_accumulator(accumulator)
+        accumulator += (results[0],)
+        accumulator = flush_accumulator(accumulator)
 
     for index, result in enumerate(results[1:-1], start=1):
-        accumulator.append(result)
+        accumulator += (result,)
 
         if ((result.level != results[index - 1].level or
                 result.function != results[index - 1].function) and
             (result.level != results[index + 1].level or
                 result.function != results[index + 1].function)):
-            flush_accumulator(accumulator)
+            accumulator = flush_accumulator(accumulator)
 
     if len(results) > 1:
-        accumulator.append(results[-1])
-        flush_accumulator(accumulator)
+        accumulator += (results[-1],)
+        accumulator = flush_accumulator(accumulator)
 
     log()
     log('           Count                Net              Total    Function')
@@ -221,7 +221,7 @@ def _analyze_stack(  # pylint: disable=too-many-locals
         )
 
 
-def flush_accumulator(accumulator: List[Result]) -> None:
+def flush_accumulator(accumulator: Tuple[Result, ...]) -> Tuple[Result, ...]:
     if accumulator:
         times: str = f'{len(accumulator)} times: ' * (len(accumulator) > 1)
 
@@ -235,4 +235,5 @@ def flush_accumulator(accumulator: List[Result]) -> None:
             f'{accumulator[0].indentation}',
             f'{times}{accumulator[0].function}',
         )
-        accumulator.clear()
+
+    return ()
