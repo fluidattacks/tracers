@@ -2,7 +2,7 @@
 import asyncio
 
 # Third party libraries
-from tracers.function import trace
+from tracers.function import call, trace
 
 
 # Constants
@@ -10,38 +10,38 @@ PRODUCTION: bool = True
 
 
 # This top-level function will be traced intentionally
-@trace
+@trace()
 async def function_a():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_b()
 
 
 # This automatically disables all downstream tracers
 #   (it means functions b to e will not be traced)
-@trace(do_trace=not PRODUCTION)
+@trace(enabled=not PRODUCTION)
 async def function_b():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_c()
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_d()
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_e()
 
 
-@trace
+@trace()
 async def function_c():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_d()
 
 
-@trace
+@trace()
 async def function_d():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
 
 
-@trace
+@trace()
 async def function_e():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
 
 
 async def main():

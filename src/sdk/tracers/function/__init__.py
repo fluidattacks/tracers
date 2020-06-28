@@ -3,13 +3,11 @@ import asyncio
 import contextlib
 import contextvars
 import functools
-import time
 import threading
 from typing import (
     Any,
     Callable,
     List,
-    Optional,
     Tuple,
 )
 
@@ -39,57 +37,46 @@ from tracers.utils import (
     delta,
     divide,
     get_function_id,
+    get_monotonic_time,
     increase_counter,
 )
 
-# Types
-FunctionWrapper = Callable[[Callable[..., Any]], Callable[..., Any]]
-
 
 def measure_loop_skew(
-    clock_id: int,
     should_measure: threading.Event,
     snapshots: List[LoopSnapshot],
 ) -> None:
 
-    def callback_handler(
-        wanted_tick_duration: float,
-        start_timestamp: float,
-    ) -> None:
+    def callback_handler(start_timestamp: float) -> None:
         real_tick_duration: float = \
-            delta(start_timestamp, time.clock_gettime(clock_id))
+            delta(start_timestamp, get_monotonic_time())
 
         snapshots.append(LoopSnapshot(
             block_duration_ratio=divide(
                 numerator=real_tick_duration,
-                denominator=wanted_tick_duration,
+                denominator=LOOP_CHECK_INTERVAL,
                 on_zero_denominator=1.0,
             ),
             real_tick_duration=real_tick_duration,
             timestamp=start_timestamp,
-            wanted_tick_duration=wanted_tick_duration,
+            wanted_tick_duration=LOOP_CHECK_INTERVAL,
         ))
 
-        schedule_callback(wanted_tick_duration)
+        schedule_callback()
 
-    def schedule_callback(wanted_tick_duration: float) -> None:
+    def schedule_callback() -> None:
         if should_measure.is_set():
             with contextlib.suppress(RuntimeError):
-                callback_handler_args: Tuple[float, float] = (
-                    wanted_tick_duration, time.clock_gettime(clock_id),
-                )
-
                 asyncio.get_running_loop().call_later(
-                    wanted_tick_duration,
+                    LOOP_CHECK_INTERVAL,
                     callback_handler,
-                    *callback_handler_args,
+                    get_monotonic_time(),
                 )
 
-    schedule_callback(LOOP_CHECK_INTERVAL)
+    schedule_callback()
 
 
-def record(
-    clock_id: int,
+def record_event(
     event: str,
     function: Callable[..., Any],
     function_name: str = '',
@@ -98,16 +85,15 @@ def record(
         event=event,
         function=function_name or get_function_id(function),
         level=LEVEL.get(),
-        timestamp=time.clock_gettime(clock_id),
+        timestamp=get_monotonic_time(),
     ),))
 
 
-def _get_wrapper(  # noqa: MC001
+def trace(  # noqa: MC0001
     *,
-    clock_id: int = time.CLOCK_MONOTONIC,
-    do_trace: bool = True,
+    enabled: bool = True,
     function_name: str = '',
-) -> FunctionWrapper:
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
 
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
 
@@ -115,21 +101,20 @@ def _get_wrapper(  # noqa: MC001
 
             @functools.wraps(function)
             async def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
-                if do_trace and TRACING.get():
+                if enabled and TRACING.get():
                     with condition() as should_measure_loop_skew, \
                             increase_counter(LEVEL):
                         if LEVEL.get() == 1:
                             should_measure_loop_skew.set()
                             snapshots: List[LoopSnapshot] = []
                             measure_loop_skew(
-                                clock_id,
                                 should_measure_loop_skew,
                                 snapshots,
                             )
 
-                        record(clock_id, 'call', function, function_name)
+                        record_event('call', function, function_name)
                         result = await function(*args, **kwargs)
-                        record(clock_id, 'return', function, function_name)
+                        record_event('return', function, function_name)
 
                         if LEVEL.get() == 1:
                             stack = STACK.get()
@@ -156,11 +141,11 @@ def _get_wrapper(  # noqa: MC001
 
                 @functools.wraps(function)
                 def wrapper(*args: Any, **kwargs: Any) -> Any:
-                    if do_trace and TRACING.get():
+                    if enabled and TRACING.get():
                         with increase_counter(LEVEL):
-                            record(clock_id, 'call', function, function_name)
+                            record_event('call', function, function_name)
                             result = function(*args, **kwargs)
-                            record(clock_id, 'return', function, function_name)
+                            record_event('return', function, function_name)
 
                             if LEVEL.get() == 1:
                                 stack = STACK.get()
@@ -201,54 +186,8 @@ def _get_wrapper(  # noqa: MC001
     return decorator
 
 
-def trace_process(
-    *,
-    do_trace: bool = True,
-    function_name: str = '',
-) -> FunctionWrapper:
-    return _get_wrapper(
-        clock_id=time.CLOCK_PROCESS_CPUTIME_ID,
-        do_trace=do_trace,
-        function_name=function_name,
-    )
+_DEFAULT_TRACER: Callable[[Callable[..., Any]], Callable[..., Any]] = trace()
 
 
-def trace_thread(
-    *,
-    do_trace: bool = True,
-    function_name: str = '',
-) -> FunctionWrapper:
-    return _get_wrapper(
-        clock_id=time.CLOCK_THREAD_CPUTIME_ID,
-        do_trace=do_trace,
-        function_name=function_name,
-    )
-
-
-def trace_monotonic(
-    *,
-    do_trace: bool = True,
-    function_name: str = '',
-) -> FunctionWrapper:
-    return _get_wrapper(
-        clock_id=time.CLOCK_MONOTONIC,
-        do_trace=do_trace,
-        function_name=function_name,
-    )
-
-
-def trace(
-    function: Optional[Callable[..., Any]] = None,
-    *,
-    do_trace: bool = True,
-    function_name: str = '',
-) -> FunctionWrapper:
-    wrapper: FunctionWrapper = trace_monotonic(
-        do_trace=do_trace,
-        function_name=function_name,
-    )
-
-    if function:
-        return wrapper(function)
-
-    return wrapper
+def call(function: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+    return _DEFAULT_TRACER(function)(*args, **kwargs)

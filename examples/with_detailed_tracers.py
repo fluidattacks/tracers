@@ -1,18 +1,18 @@
 import time
 from dateutil.parser import parse
-from tracers.function import trace
+from tracers.function import call, trace
 
 
-@trace
+@trace()
 def example():
-    trace(time.sleep)(2.0)
+    call(time.sleep, 2.0)
     your_business_logic('Sat Oct 11')
 
 
-@trace
+@trace()
 def your_business_logic(date: str):
-    trace(parse)(date)
-    trace(time.sleep)(1.0)
+    call(parse, date)
+    call(time.sleep, 1.0)
 
 
 example()

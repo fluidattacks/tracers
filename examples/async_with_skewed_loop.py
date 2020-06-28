@@ -3,42 +3,42 @@ import time
 import asyncio
 
 # Third party libraries
-from tracers.function import trace
+from tracers.function import call, trace
 
 
-@trace
+@trace()
 async def function_a():
-    await trace(asyncio.sleep)(0.1)
-    trace(time.sleep)(0.5)
+    await call(asyncio.sleep, 0.1)
+    call(time.sleep, 0.5)
     await function_b()
 
 
-@trace
+@trace()
 async def function_b():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_c()
-    trace(time.sleep)(2)
-    await trace(asyncio.sleep)(0.1)
+    call(time.sleep, 2)
+    await call(asyncio.sleep, 0.1)
     await function_d()
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
     await function_e()
 
 
-@trace
+@trace()
 async def function_c():
-    await trace(asyncio.sleep)(0.1)
-    trace(time.sleep)(0.5)
+    await call(asyncio.sleep, 0.1)
+    call(time.sleep, 0.5)
     await function_d()
 
 
-@trace
+@trace()
 async def function_d():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
 
 
-@trace
+@trace()
 async def function_e():
-    await trace(asyncio.sleep)(0.1)
+    await call(asyncio.sleep, 0.1)
 
 
 if __name__ == '__main__':

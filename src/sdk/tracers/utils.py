@@ -7,6 +7,7 @@ from contextvars import (
 )
 import sys
 import threading
+import time
 from typing import (
     Any,
     Callable,
@@ -53,6 +54,10 @@ def get_function_id(
         return f'{prefix}{module}.{name}'
 
     return f'{prefix}{name}'
+
+
+def get_monotonic_time() -> float:
+    return time.clock_gettime(time.CLOCK_MONOTONIC)
 
 
 @contextlib.contextmanager

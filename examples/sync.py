@@ -2,39 +2,39 @@
 import time
 
 # Third party libraries
-from tracers.function import trace
+from tracers.function import call, trace
 
 
-@trace
+@trace()
 def function_a():
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
     function_b()
 
 
-@trace
+@trace()
 def function_b():
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
     function_c()
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
     function_d()
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
     function_e()
 
 
-@trace
+@trace()
 def function_c():
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
     function_d()
 
 
-@trace
+@trace()
 def function_d():
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
 
 
-@trace
+@trace()
 def function_e():
-    trace(time.sleep)(0.1)
+    call(time.sleep, 0.1)
 
 
 def main():
