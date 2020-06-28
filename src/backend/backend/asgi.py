@@ -9,7 +9,7 @@ from starlette.routing import Route
 # Local libraries
 import backend.api.schema.mutation
 import backend.api.schema.query
-import backend.utils.apm
+import tracers.function
 
 SERVER = Starlette(
     routes=[
@@ -24,4 +24,4 @@ SERVER = Starlette(
     ],
 )
 
-backend.utils.apm.trace()(time.sleep)(0)
+tracers.function.call(time.sleep, 0)

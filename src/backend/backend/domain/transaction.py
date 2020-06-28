@@ -9,7 +9,7 @@ from typing import (
 )
 
 # Local libraries
-import backend.utils.apm
+import tracers.function
 import backend.dal.aws.dynamodb
 
 # Containers
@@ -22,7 +22,7 @@ Transaction = NamedTuple('Transaction', [
 ])
 
 
-@backend.utils.apm.trace()
+@tracers.function.trace()
 async def put(
     *,
     transactions: Tuple[Transaction, ...],

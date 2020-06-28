@@ -6,8 +6,8 @@ from typing import (
 )
 
 # Local libraries
-from tracers.utils import (
-    log_stderr,
+from tracers.constants import (
+    LOGGER_DAEMON,
 )
 
 
@@ -17,9 +17,9 @@ def _get(var_name: str) -> Optional[str]:
     if var_name in [
         'TRACERS_API_TOKEN',
     ]:
-        log_stderr(f'[INFO] {var_name} = {"<set>" if var_value else ""}')
+        LOGGER_DAEMON.info('%s = %s', var_name, "<set>" if var_value else "")
     else:
-        log_stderr(f'[INFO] {var_name} = {var_value}')
+        LOGGER_DAEMON.info('%s = %s', var_name, var_value)
 
     return var_value
 

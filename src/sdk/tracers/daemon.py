@@ -14,6 +14,9 @@ import aiogqlc
 from more_itertools import iter_except
 
 # Local libraries
+from tracers.constants import (
+    LOGGER_DAEMON,
+)
 from tracers.containers import (
     DaemonResult,
 )
@@ -22,7 +25,6 @@ from tracers.graphql import (
 )
 from tracers.utils import (
     delta,
-    log_stderr,
 )
 
 # Private constants
@@ -41,9 +43,9 @@ async def daemon() -> None:
             )
 
             if success:
-                log_stderr(f'[DAEMON] Uploaded transactions: {results_len}')
+                LOGGER_DAEMON.info('Uploaded transactions: %s', results_len)
             else:
-                log_stderr(f'[DAEMON] Error uploading: {msg}')
+                LOGGER_DAEMON.error('Uploading transactions: %s', msg)
 
 
 def send_result_to_daemon(
