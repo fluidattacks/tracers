@@ -3,10 +3,10 @@
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     0.01s [  5.0%]     0.12s [100.0%]    ✓ function_a
-     2     0.00s     0.12s [ 95.0%]     0.12s [ 95.0%]    ¦   ✓ 100 times: function_b
+     1     0.00s     0.01s [  5.7%]     0.12s [100.0%]    ✓ function_a
+     2     0.00s     0.12s [ 94.3%]     0.12s [ 94.3%]    ¦   ✓ 100 times: function_b
 
            Count                Net              Total    Function
 
-             100     0.12s [ 95.0%]     0.12s [ 95.0%]    ✓ function_b
-               1     0.01s [  5.0%]     0.12s [100.0%]    ✓ function_a
+             100     0.12s [ 94.3%]     0.12s [ 94.3%]    ✓ function_b
+               1     0.01s [  5.7%]     0.12s [100.0%]    ✓ function_a

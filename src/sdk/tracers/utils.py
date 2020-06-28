@@ -5,13 +5,17 @@ from contextvars import (
     ContextVar,
     Token,
 )
-import sys
 import threading
 import time
 from typing import (
     Any,
     Callable,
     Iterator,
+)
+
+# Local libraries
+from tracers.contextvars import (
+    LOGGING_TO,
 )
 
 
@@ -70,8 +74,5 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
 
 
 def log(*parts: Any) -> None:
-    print(*parts)
-
-
-def log_stderr(*parts: Any) -> None:
-    print(*parts, file=sys.stderr)
+    if LOGGING_TO.get():
+        print(*parts, file=LOGGING_TO.get())

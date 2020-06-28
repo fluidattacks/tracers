@@ -13,7 +13,7 @@ function main {
     &&  for example in ../../examples/*.py
         do
               echo "[INFO] Running test: ${example}" \
-          &&  poetry run python "${example}" | tee "${example%.*}.output" \
+          &&  poetry run python "${example}" |& tee "${example%.*}.output" \
           ||  return 1
         done \
   &&  popd \

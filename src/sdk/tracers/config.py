@@ -7,7 +7,7 @@ from typing import (
 
 # Local libraries
 from tracers.utils import (
-    log_stderr,
+    log,
 )
 
 
@@ -17,9 +17,9 @@ def _get(var_name: str) -> Optional[str]:
     if var_name in [
         'TRACERS_API_TOKEN',
     ]:
-        log_stderr(f'[INFO] {var_name} = {"<set>" if var_value else ""}')
+        log(f'[INFO] {var_name} = {"<set>" if var_value else ""}')
     else:
-        log_stderr(f'[INFO] {var_name} = {var_value}')
+        log(f'[INFO] {var_name} = {var_value}')
 
     return var_value
 

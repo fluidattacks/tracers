@@ -1,0 +1,28 @@
+
+🛈  Finished transaction: 0.81 seconds
+
+     # Timestamp                Net              Total    Call Chain
+
+     1     0.00s     0.00s [  0.0%]     0.81s [100.0%]    ✓ async function_a
+     2     0.00s     0.10s [ 12.4%]     0.10s [ 12.4%]    ¦   ✓ async asyncio.tasks.sleep
+     3     0.10s     0.00s [  0.1%]     0.71s [ 87.5%]    ¦   ✓ async function_b
+     4     0.10s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+     5     0.20s     0.00s [  0.1%]     0.20s [ 25.1%]    ¦   ¦   ✓ async function_c
+     6     0.20s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+     7     0.30s     0.00s [  0.0%]     0.10s [ 12.5%]    ¦   ¦   ¦   ✓ async function_d
+     8     0.30s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+     9     0.40s     0.10s [ 12.4%]     0.10s [ 12.4%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+    10     0.51s     0.00s [  0.0%]     0.10s [ 12.4%]    ¦   ¦   ✓ async function_d
+    11     0.51s     0.10s [ 12.4%]     0.10s [ 12.4%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+    12     0.61s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ✓ async asyncio.tasks.sleep
+    13     0.71s     0.00s [  0.0%]     0.10s [ 12.5%]    ¦   ¦   ✓ async function_e
+    14     0.71s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ¦   ¦   ✓ async asyncio.tasks.sleep
+
+           Count                Net              Total    Function
+
+               8     0.81s [ 99.8%]     0.81s [ 99.8%]    ✓ async asyncio.tasks.sleep
+               1     0.00s [  0.1%]     0.71s [ 87.5%]    ✓ async function_b
+               1     0.00s [  0.1%]     0.20s [ 25.1%]    ✓ async function_c
+               2     0.00s [  0.0%]     0.20s [ 25.0%]    ✓ async function_d
+               1     0.00s [  0.0%]     0.81s [100.0%]    ✓ async function_a
+               1     0.00s [  0.0%]     0.10s [ 12.5%]    ✓ async function_e

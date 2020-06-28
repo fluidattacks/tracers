@@ -3,12 +3,14 @@ import asyncio
 import contextlib
 import contextvars
 import functools
+import sys
 import threading
 from typing import (
     Any,
     Callable,
     List,
-    Tuple,
+    Optional,
+    TextIO,
 )
 
 # Local libraries
@@ -26,6 +28,7 @@ from tracers.containers import (
 )
 from tracers.contextvars import (
     LEVEL,
+    LOGGING_TO,
     STACK,
     TRACING,
 )
@@ -93,6 +96,7 @@ def trace(  # noqa: MC0001
     *,
     enabled: bool = True,
     function_name: str = '',
+    log_to: Optional[TextIO] = sys.stderr,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
 
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
@@ -101,38 +105,46 @@ def trace(  # noqa: MC0001
 
             @functools.wraps(function)
             async def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
-                if enabled and TRACING.get():
-                    with condition() as should_measure_loop_skew, \
-                            increase_counter(LEVEL):
-                        if LEVEL.get() == 1:
-                            should_measure_loop_skew.set()
-                            snapshots: List[LoopSnapshot] = []
-                            measure_loop_skew(
-                                should_measure_loop_skew,
-                                snapshots,
-                            )
 
-                        record_event('call', function, function_name)
+                @functools.wraps(function)
+                async def wrapper(*args: Any, **kwargs: Any) -> Any:
+                    if LEVEL.get() == 0:
+                        LOGGING_TO.set(log_to)
+
+                    if enabled and TRACING.get():
+                        with condition() as should_measure_loop_skew, \
+                                increase_counter(LEVEL):
+                            if LEVEL.get() == 1:
+                                should_measure_loop_skew.set()
+                                snapshots: List[LoopSnapshot] = []
+                                measure_loop_skew(
+                                    should_measure_loop_skew,
+                                    snapshots,
+                                )
+
+                            record_event('call', function, function_name)
+                            result = await function(*args, **kwargs)
+                            record_event('return', function, function_name)
+
+                            if LEVEL.get() == 1:
+                                stack = STACK.get()
+                                analyze_stack(stack)
+                                analyze_loop_snapshots(tuple(snapshots))
+                                send_result_to_daemon(
+                                    result=DaemonResult(
+                                        stack=stack,
+                                    ),
+                                )
+                    else:
+                        # Disable downstream tracers
+                        TRACING.set(False)
+
+                        # No overhead is introduced!
                         result = await function(*args, **kwargs)
-                        record_event('return', function, function_name)
 
-                        if LEVEL.get() == 1:
-                            stack = STACK.get()
-                            analyze_stack(stack)
-                            analyze_loop_snapshots(tuple(snapshots))
-                            send_result_to_daemon(
-                                result=DaemonResult(
-                                    stack=stack,
-                                ),
-                            )
-                else:
-                    # Disable downstream tracers
-                    TRACING.set(False)
+                    return result
 
-                    # No overhead is introduced!
-                    result = await function(*args, **kwargs)
-
-                return result
+                return await wrapper(*args, **kwargs)
 
         elif callable(function):
 
@@ -141,6 +153,9 @@ def trace(  # noqa: MC0001
 
                 @functools.wraps(function)
                 def wrapper(*args: Any, **kwargs: Any) -> Any:
+                    if LEVEL.get() == 0:
+                        LOGGING_TO.set(log_to)
+
                     if enabled and TRACING.get():
                         with increase_counter(LEVEL):
                             record_event('call', function, function_name)

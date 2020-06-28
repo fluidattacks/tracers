@@ -22,7 +22,7 @@ from tracers.graphql import (
 )
 from tracers.utils import (
     delta,
-    log_stderr,
+    log,
 )
 
 # Private constants
@@ -41,9 +41,9 @@ async def daemon() -> None:
             )
 
             if success:
-                log_stderr(f'[DAEMON] Uploaded transactions: {results_len}')
+                log(f'[DAEMON] Uploaded transactions: {results_len}')
             else:
-                log_stderr(f'[DAEMON] Error uploading: {msg}')
+                log(f'[DAEMON] Error uploading: {msg}')
 
 
 def send_result_to_daemon(
