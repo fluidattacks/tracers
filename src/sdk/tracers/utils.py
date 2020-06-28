@@ -14,6 +14,11 @@ from typing import (
     Iterator,
 )
 
+# Local libraries
+from tracers.contextvars import (
+    LOGGING_TO,
+)
+
 
 @contextlib.contextmanager
 def condition() -> Iterator[threading.Event]:
@@ -70,7 +75,8 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
 
 
 def log(*parts: Any) -> None:
-    print(*parts)
+    if LOGGING_TO.get():
+        print(*parts, file=LOGGING_TO.get())
 
 
 def log_stderr(*parts: Any) -> None:
