@@ -17,7 +17,7 @@ from boto3.dynamodb.conditions import (
 )
 
 # Local libraries
-import backend.utils.apm
+import tracers.function
 
 # Constants
 CONFIG = dict(
@@ -37,14 +37,14 @@ class Item(NamedTuple):
     attributes: Dict[str, Any] = {}
 
 
-@backend.utils.apm.trace()
+@tracers.function.trace()
 @contextlib.asynccontextmanager
 async def _table() -> aioboto3.dynamodb.table.TableResource:
     async with aioboto3.resource(**CONFIG) as resource:
         yield await resource.Table('main')
 
 
-@backend.utils.apm.trace()
+@tracers.function.trace()
 async def query(
     *,
     hash_key: str,
@@ -82,7 +82,7 @@ async def query(
     )
 
 
-@backend.utils.apm.trace()
+@tracers.function.trace()
 async def put(
     *,
     items: Tuple[Item, ...],

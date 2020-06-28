@@ -2,7 +2,7 @@
 authors = [
   "Kevin Amado <kamadorueda@gmail.com>"
 ]
-description = "Open-Source APM (Application monitoring) project that offers you zero overhead wrappers for profiling your code execution flow"
+description = "Open-Source APM (Application monitoring) project that offers you minimal overhead wrappers for profiling your code execution flow"
 license = "MIT"
 name = "backend"
 packages = [
