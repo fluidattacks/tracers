@@ -6,11 +6,21 @@ from contextvars import (
     Token,
 )
 import sys
+import threading
 from typing import (
     Any,
     Callable,
     Iterator,
 )
+
+
+@contextlib.contextmanager
+def condition() -> Iterator[threading.Event]:
+    instance: threading.Event = threading.Event()
+    try:
+        yield instance
+    finally:
+        instance.clear()
 
 
 def delta(start_timestamp: float, end_timestamp: float) -> float:

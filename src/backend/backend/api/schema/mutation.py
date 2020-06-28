@@ -16,7 +16,6 @@ import backend.utils.apm
 class TransactionInput(graphene.InputObjectType):
     initiator = graphene.String()
     stack = backend.api.schema.types.JSONString()
-    stdout = graphene.String()
     tenant_id = graphene.ID()
     total_time = graphene.Decimal()
 

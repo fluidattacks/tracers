@@ -15,4 +15,3 @@
                1     0.00s [  0.0%]     0.00s [  0.0%]    ✓ dateutil.parser._parser.parse
                1     0.00s [  0.0%]     1.00s [ 33.4%]    ✓ your_business_logic
                1     0.00s [  0.0%]     3.00s [100.0%]    ✓ example
-

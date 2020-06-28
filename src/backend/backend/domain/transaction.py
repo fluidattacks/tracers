@@ -31,7 +31,6 @@ async def put(
         backend.dal.aws.dynamodb.Item(
             attributes=dict(
                 stack=transaction.stack,
-                stdout=transaction.stdout,
                 total_time=transaction.total_time,
             ),
             hash_key=f'tenant:{transaction.tenant_id}/transaction',
