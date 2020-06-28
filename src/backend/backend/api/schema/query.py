@@ -9,7 +9,7 @@ import graphene
 
 # Local libraries
 import backend.api.schema.types
-import backend.utils.apm
+import tracers.function
 
 
 class Transaction(graphene.ObjectType):
@@ -22,7 +22,7 @@ class Transaction(graphene.ObjectType):
 class Query(graphene.ObjectType):  # type: ignore
     transactions = graphene.List(Transaction)
 
-    @backend.utils.apm.trace()
+    @tracers.function.trace()
     async def resolve_transactions(
         self,
         info: Any,

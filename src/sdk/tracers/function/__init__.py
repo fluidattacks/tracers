@@ -3,14 +3,13 @@ import asyncio
 import contextlib
 import contextvars
 import functools
-import sys
+import logging
 import threading
 from typing import (
     Any,
     Callable,
     List,
     Optional,
-    TextIO,
 )
 
 # Local libraries
@@ -19,6 +18,7 @@ from tracers.analyzers import (
     analyze_stack,
 )
 from tracers.constants import (
+    LOGGER_DEFAULT,
     LOOP_CHECK_INTERVAL,
 )
 from tracers.containers import (
@@ -28,7 +28,7 @@ from tracers.containers import (
 )
 from tracers.contextvars import (
     LEVEL,
-    LOGGING_TO,
+    LOGGER,
     STACK,
     TRACING,
 )
@@ -96,7 +96,7 @@ def trace(  # noqa: MC0001
     *,
     enabled: bool = True,
     function_name: str = '',
-    log_to: Optional[TextIO] = sys.stderr,
+    log_to: Optional[logging.Logger] = LOGGER_DEFAULT,
 ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
 
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
@@ -109,7 +109,7 @@ def trace(  # noqa: MC0001
                 @functools.wraps(function)
                 async def wrapper(*args: Any, **kwargs: Any) -> Any:
                     if LEVEL.get() == 0:
-                        LOGGING_TO.set(log_to)
+                        LOGGER.set(log_to)
 
                     if enabled and TRACING.get():
                         with condition() as should_measure_loop_skew, \
@@ -154,7 +154,7 @@ def trace(  # noqa: MC0001
                 @functools.wraps(function)
                 def wrapper(*args: Any, **kwargs: Any) -> Any:
                     if LEVEL.get() == 0:
-                        LOGGING_TO.set(log_to)
+                        LOGGER.set(log_to)
 
                     if enabled and TRACING.get():
                         with increase_counter(LEVEL):

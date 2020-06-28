@@ -2,10 +2,12 @@
 from contextvars import (
     ContextVar,
 )
+from logging import (
+    Logger,
+)
 from typing import (
     Optional,
     Tuple,
-    TextIO,
 )
 
 # Local libraries
@@ -15,8 +17,8 @@ from tracers.containers import (
 
 LEVEL: ContextVar[int] = \
     ContextVar('LEVEL', default=0)
-LOGGING_TO: ContextVar[Optional[TextIO]] = \
-    ContextVar('LOGGING_TO', default=None)
+LOGGER: ContextVar[Optional[Logger]] = \
+    ContextVar('LOGGER', default=None)
 STACK: ContextVar[Tuple[Frame, ...]] = \
     ContextVar('STACK', default=())
 TRACING: ContextVar[bool] = \
