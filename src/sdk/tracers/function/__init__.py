@@ -4,6 +4,7 @@ import contextlib
 import contextvars
 import functools
 import time
+import threading
 from typing import (
     Any,
     Callable,
@@ -44,7 +45,11 @@ from tracers.utils import (
 FunctionWrapper = Callable[[Callable[..., Any]], Callable[..., Any]]
 
 
-def measure_loop_skew(snapshots: List[LoopSnapshot], clock_id: int) -> None:
+def measure_loop_skew(
+    clock_id: int,
+    should_measure_loop_skew: threading.Event,
+    snapshots: List[LoopSnapshot],
+) -> None:
 
     def callback_handler(
         wanted_tick_duration: float,
@@ -64,21 +69,20 @@ def measure_loop_skew(snapshots: List[LoopSnapshot], clock_id: int) -> None:
             wanted_tick_duration=wanted_tick_duration,
         ))
 
-        if LEVEL.get() == 1:
-            schedule_callback(wanted_tick_duration)
+        schedule_callback(wanted_tick_duration)
 
     def schedule_callback(wanted_tick_duration: float) -> None:
-        with contextlib.suppress(RuntimeError):
-            callback_handler_args: Tuple[float, float] = (
-                wanted_tick_duration, time.clock_gettime(clock_id),
-            )
+        if should_measure_loop_skew.is_set():
+            with contextlib.suppress(RuntimeError):
+                callback_handler_args: Tuple[float, float] = (
+                    wanted_tick_duration, time.clock_gettime(clock_id),
+                )
 
-            loop = asyncio.get_running_loop()
-            loop.call_later(
-                wanted_tick_duration,
-                callback_handler,
-                *callback_handler_args,
-            )
+                asyncio.get_running_loop().call_later(
+                    wanted_tick_duration,
+                    callback_handler,
+                    *callback_handler_args,
+                )
 
     schedule_callback(LOOP_CHECK_INTERVAL)
 
@@ -113,8 +117,14 @@ def _get_wrapper(  # noqa: MC001
                 if do_trace and TRACING.get():
                     with increase_counter(LEVEL):
                         if LEVEL.get() == 1:
+                            should_measure_loop_skew = threading.Event()
+                            should_measure_loop_skew.set()
                             snapshots: List[LoopSnapshot] = []
-                            measure_loop_skew(snapshots, clock_id)
+                            measure_loop_skew(
+                                clock_id,
+                                should_measure_loop_skew,
+                                snapshots,
+                            )
 
                         record(clock_id, 'call', function, function_name)
                         result = await function(*args, **kwargs)
@@ -129,6 +139,7 @@ def _get_wrapper(  # noqa: MC001
                                     stack=stack,
                                 ),
                             )
+                            should_measure_loop_skew.clear()
                 else:
                     # Disable downstream tracers
                     TRACING.set(False)
