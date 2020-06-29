@@ -6,10 +6,12 @@ from typing import (
 
 # Third party libraries
 import graphene
+import graphql.execution.base
 import tracers.function
 
 # Local libraries
 import backend.api.schema.types
+import backend.authc.claims
 import backend.domain.transaction
 
 # Pylint config
@@ -30,12 +32,14 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     success = graphene.Boolean()
 
     @tracers.function.trace()
+    @backend.authc.claims.verify
     async def mutate(
         self,
-        _: Any,
+        info: graphql.execution.base.ResolveInfo,
         transactions: Tuple[TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put(
+            claims=info.request['authc'],
             transactions=transactions,
         )
 

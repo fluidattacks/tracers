@@ -20,6 +20,7 @@ from boto3.dynamodb.conditions import (
 
 # Local libraries
 import tracers.function
+import backend.utils.aio
 
 # Constants
 CONFIG = dict(
@@ -40,10 +41,22 @@ class Item(NamedTuple):
 
 
 @tracers.function.trace()
-@contextlib.asynccontextmanager
-async def _table() -> aioboto3.dynamodb.table.TableResource:
-    async with aioboto3.resource(**CONFIG) as resource:
-        yield await resource.Table('main')
+@backend.utils.aio.to_async
+def build_key(parameters: Dict[str, str]) -> str:
+    if not parameters:
+        raise ValueError('Empty parameters')
+
+    if not all(
+        isinstance(obj, str)
+        for arguments in parameters.items()
+        for obj in arguments
+    ):
+        raise TypeError('Expected Dict[str, str]')
+
+    return '/'.join(
+        f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
+        for attribute_name, attribute_value in parameters.items()
+    )
 
 
 @tracers.function.trace()
@@ -107,3 +120,10 @@ async def put(
                 ))
 
     return success
+
+
+@tracers.function.trace()
+@contextlib.asynccontextmanager
+async def _table() -> aioboto3.dynamodb.table.TableResource:
+    async with aioboto3.resource(**CONFIG) as resource:
+        yield await resource.Table('main')

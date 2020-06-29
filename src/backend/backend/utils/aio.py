@@ -26,10 +26,11 @@ async def _ensure(
     executor: Union[ProcessPoolExecutor, ThreadPoolExecutor],
     functions: Tuple[Callable[..., Any], ...],
 ) -> Any:
+    print(executor, functions)
     loop = asyncio.get_running_loop()
 
     return await materialize(tuple(
-        loop.run_in_executor(executor, functions) for functions in functions
+        loop.run_in_executor(executor, function) for function in functions
     ))
 
 
@@ -39,9 +40,11 @@ async def ensure_cpu_bound(
     *args: Any,
     **kwargs: Any,
 ) -> Any:
-    return await _ensure(PROCESSOR, [
+    results = await _ensure(PROCESSOR, [
         functools.partial(function, *args, **kwargs)
     ])
+
+    return results[0]
 
 
 @tracers.function.trace()
@@ -50,21 +53,23 @@ async def ensure_io_bound(
     *args: Any,
     **kwargs: Any,
 ) -> Any:
-    return await _ensure(THREADER, [
+    results = await _ensure(THREADER, [
         functools.partial(function, *args, **kwargs)
     ])
+
+    return results[0]
 
 
 @tracers.function.trace()
 async def ensure_many_cpu_bound(
-    functions: Tuple[Callable[..., Any], ...],
+    functions: Tuple[Callable[[], Any], ...],
 ) -> Any:
     return await _ensure(PROCESSOR, functions)
 
 
 @tracers.function.trace()
 async def ensure_many_io_bound(
-    functions: Tuple[Callable[..., Any], ...],
+    functions: Tuple[Callable[[], Any], ...],
 ) -> Any:
     return await _ensure(THREADER, functions)
 
@@ -78,31 +83,23 @@ async def materialize(obj: object) -> object:
             dict(zip(obj, await materialize(tuple(obj.values()))))
     elif isinstance(obj, (list, tuple)):
         materialized_obj = \
-            await asyncio.gather(*tuple(map(asyncio.create_task, obj)))
+            await asyncio.gather(*tuple(
+                elem
+                if isinstance(elem, asyncio.Future)
+                else asyncio.create_task(elem)
+                for elem in obj
+            ))
     else:
         raise ValueError(f'Not implemented for type: {type(obj)}')
 
     return materialized_obj
 
 
-async def _wrap_function(
-    ensurer: Callable[[Callable[..., Any], ...], Any],
-) -> Callable[..., Any]:
+def to_async(function: Callable[..., Any]) -> Callable[..., Any]:
 
-    async def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
+    @tracers.function.trace(function_name='to_async')
+    @functools.wraps(function)
+    async def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return await ensure_io_bound(function, *args, **kwargs)
 
-        @functools.wraps(function)
-        async def wrapper(*args: Any, **kwargs: Any) -> Any:
-            return await ensurer(function, *args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
-async def wrap_cpu_bound(function: Callable[..., Any]) -> Callable[..., Any]:
-    return _wrap_function(ensure_cpu_bound)(function)
-
-
-async def wrap_io_bound(function: Callable[..., Any]) -> Callable[..., Any]:
-    return _wrap_function(ensure_io_bound)(function)
+    return wrapper

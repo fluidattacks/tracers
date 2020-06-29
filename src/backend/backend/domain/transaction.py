@@ -5,16 +5,18 @@ from typing import (
     Tuple,
 )
 
-# Local libraries
+# Third party libraries
 import tracers.function
-import backend.dal.aws.dynamodb
+
+# Local libraries
+import backend.authc.claims
 import backend.config
+import backend.dal.aws.dynamodb
 
 # Containers
 Transaction = NamedTuple('Transaction', [
     ('initiator', str),
     ('stack', Tuple[Any, ...]),
-    ('tenant_id', str),
     ('total_time', float),
 ])
 
@@ -22,6 +24,7 @@ Transaction = NamedTuple('Transaction', [
 @tracers.function.trace()
 async def put(
     *,
+    claims: backend.authc.claims.TracersTenant,
     transactions: Tuple[Transaction, ...],
 ) -> bool:
     success = await backend.dal.aws.dynamodb.put(
@@ -32,7 +35,7 @@ async def put(
                     stack=transaction.stack,
                     total_time=transaction.total_time,
                 ),
-                hash_key=f'tenant:{transaction.tenant_id}/transaction',
+                hash_key=backend.dal.aws.dynamodb.build_key(claims.as_dict()),
                 range_key=transaction.initiator,
             )
             for transaction in transactions

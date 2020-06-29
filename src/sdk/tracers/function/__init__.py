@@ -199,7 +199,7 @@ def trace(  # noqa: MC0001
 
             # We were not able to wrap this object
             raise TypeError(
-                f'Excpected callable or coroutine function, '
+                f'Expected callable or coroutine function, '
                 f'got: {type(function)}'
             )
 
