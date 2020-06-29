@@ -1,7 +1,6 @@
 # Standard library
 import asyncio
 from collections import deque
-import json
 from threading import Thread
 from typing import (
     Deque,
@@ -25,6 +24,7 @@ from tracers.graphql import (
 )
 from tracers.utils import (
     delta,
+    json_dumps,
 )
 
 # Private constants
@@ -77,7 +77,7 @@ async def send_results_to_server(
                 transactions=[
                     dict(
                         initiator=result.stack[0].function,
-                        stack=json.dumps(result.stack),
+                        stack=json_dumps(result.stack),
                         tenantId='123',
                         totalTime=str(delta(
                             result.stack[0].timestamp,
