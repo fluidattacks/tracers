@@ -8,12 +8,14 @@ from typing import (
     List,
     NamedTuple,
     Optional,
+    Set,
     Tuple,
 )
 
 # Third party libraries
 import aioboto3
 import aioboto3.dynamodb.table
+import botocore.exceptions
 from boto3.dynamodb.conditions import (
     Key,
 )
@@ -34,10 +36,16 @@ CONFIG = dict(
 
 
 # Containers
-class Item(NamedTuple):
+class Request(NamedTuple):
     hash_key: str
     range_key: str
-    attributes: Dict[str, Any] = {}
+
+    allow_condition_failure: bool = False
+    condition_expression: Optional[Any] = None
+    expires_in: Optional[float] = None
+    expression_attribute_names: Dict[str, Any] = {}
+    expression_attribute_values: Dict[str, Any] = {}
+    update_expression: Dict[str, Set[str]] = {}
 
 
 @tracers.function.trace()
@@ -54,7 +62,7 @@ def build_key(parameters: Dict[str, str]) -> str:
         raise TypeError('Expected Dict[str, str]')
 
     return '/'.join(
-        f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
+        f'{attribute_name}:{attribute_value}'
         for attribute_name, attribute_value in parameters.items()
     )
 
@@ -65,7 +73,7 @@ async def query(
     hash_key: str,
     range_key: Optional[str] = None,
     attributes_to_get: Optional[Tuple[str, ...]] = None,
-) -> Tuple[Item, ...]:
+) -> Tuple[object, ...]:
     results: List[object] = []
 
     condition = Key('hash_key').eq(hash_key)
@@ -87,39 +95,61 @@ async def query(
             result = await table.query(**params)
             results.extend(result['Items'])
 
-    return tuple(
-        Item(
-            hash_key=result.pop('hash_key'),
-            range_key=result.pop('range_key'),
-            attributes=result,
-        )
-        for result in result['Items']
-    )
+    return tuple(results)
 
 
 @tracers.function.trace()
-async def put(
-    *,
-    expires_in: Optional[float] = None,
-    items: Tuple[Item, ...],
-) -> bool:
-    success: bool = True
+async def put(requests: Tuple[Request, ...]) -> bool:
+    success: List[bool] = []
 
     async with _table() as table:
-        async with table.batch_writer(
-            overwrite_by_pkeys=['hash_key', 'range_key'],
-        ) as batch:
-            for item in items:
-                if expires_in:
-                    item.attributes['ttl'] = int(time.time()) + expires_in
+        for request in requests:
+            if request.expires_in:
+                request.expression_attribute_names['#ttl'] = 'ttl'
+                request.expression_attribute_values[':ttl'] = \
+                    int(time.time()) + request.expires_in
+                request.update_expression['SET'].add('#ttl = :ttl')
+            else:
+                request.expression_attribute_names.pop('#ttl', None)
+                request.expression_attribute_values.pop(':ttl', None)
+                request.update_expression['SET'].discard('#ttl = :ttl')
 
-                await batch.put_item(Item=dict(
-                    hash_key=item.hash_key,
-                    range_key=item.range_key,
-                    **item.attributes,
-                ))
+            try:
+                response = await table.update_item(
+                    Key={
+                        'hash_key': request.hash_key,
+                        'range_key': request.range_key,
+                    },
+                    **{
+                        condition_name: condition_value
+                        for condition_name, condition_value in [
+                            ('ConditionExpression',
+                                request.condition_expression),
+                            ('ExpressionAttributeNames',
+                                request.expression_attribute_names),
+                            ('ExpressionAttributeValues',
+                                request.expression_attribute_values),
+                            ('UpdateExpression',
+                                ', '.join(
+                                    f'{operation} {statement}'
+                                    for operation, statements in
+                                    request.update_expression.items()
+                                    for statement in [', '.join(statements)]
+                                )),
+                        ]
+                        if condition_value
+                    },
+                )
+                success.append(
+                    response['ResponseMetadata']['HTTPStatusCode'] == 200
+                )
+            except botocore.exceptions.ClientError as exception:
+                if 'ConditionalCheckFailedException' in str(exception):
+                    success.append(request.allow_condition_failure)
+                else:
+                    success.append(False)
 
-    return success
+    return all(success)
 
 
 @tracers.function.trace()

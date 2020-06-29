@@ -37,6 +37,7 @@ function main {
   &&  echo '[INFO] Deploying infrastructure' \
   &&  pushd infra \
     &&  terraform init \
+    &&  terraform plan \
     &&  terraform apply -auto-approve \
   &&  popd \
   &&  echo "[INFO] DynamoDB is ready and listening on port ${dynamo_port}!" \
