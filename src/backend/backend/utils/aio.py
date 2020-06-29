@@ -8,6 +8,8 @@ import functools
 from multiprocessing import cpu_count
 from typing import (
     Any,
+    Awaitable,
+    cast,
     Tuple,
     Callable,
     Union,
@@ -19,7 +21,6 @@ import tracers.function
 # Local libraries
 from backend.typing import (
     T,
-    V,
 )
 
 # Executors
@@ -100,13 +101,11 @@ async def materialize(obj: object) -> object:
     return materialized_obj
 
 
-def to_async(function: Callable[..., T]) -> Callable[..., T]:
+def to_async(function: Callable[..., T]) -> Callable[..., Awaitable[T]]:
 
     @tracers.function.trace(function_name='to_async')
     @functools.wraps(function)
-    async def wrapper(*args: str, **kwargs: Any) -> T:
-        result = await ensure_io_bound(function, *args, **kwargs)
+    async def wrapper(*args: str, **kwargs: Any) -> Any:
+        return await ensure_io_bound(function, *args, **kwargs)
 
-        return result
-
-    return wrapper
+    return cast(Callable[..., Awaitable[T]], wrapper)

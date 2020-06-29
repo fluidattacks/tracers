@@ -1,6 +1,5 @@
 # Standard library
 from typing import (
-    Any,
     Tuple,
 )
 
@@ -32,14 +31,14 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     success = graphene.Boolean()
 
     @tracers.function.trace()
-    @backend.authc.claims.verify
+    @backend.authc.claims.verify  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
         transactions: Tuple[TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put(
-            claims=info.context['authc'],
+            claims=getattr(info, 'context')['authc'],
             transactions=transactions,
         )
 

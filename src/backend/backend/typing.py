@@ -4,5 +4,4 @@ from typing import (
 )
 
 
-T = TypeVar('T')
-V = TypeVar('V')
+T = TypeVar('T')  # pylint: disable=invalid-name

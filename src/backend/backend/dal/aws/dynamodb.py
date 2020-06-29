@@ -41,7 +41,7 @@ class Item(NamedTuple):
 
 
 @tracers.function.trace()
-@backend.utils.aio.to_async
+@backend.utils.aio.to_async  # type: ignore
 def build_key(parameters: Dict[str, str]) -> str:
     if not parameters:
         raise ValueError('Empty parameters')
