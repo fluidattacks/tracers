@@ -62,7 +62,7 @@ def build_key(parameters: Dict[str, str]) -> str:
         raise TypeError('Expected Dict[str, str]')
 
     return '/'.join(
-        f'{attribute_name}:{attribute_value}'
+        f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
         for attribute_name, attribute_value in parameters.items()
     )
 

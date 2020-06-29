@@ -25,7 +25,7 @@ from backend.typing import (
 
 # Executors
 PROCESSOR = ProcessPoolExecutor(max_workers=cpu_count() - 1)
-THREADER = ThreadPoolExecutor(max_workers=cpu_count() - 1)
+THREADER = ThreadPoolExecutor(max_workers=1)
 
 
 @tracers.function.trace()
@@ -88,13 +88,12 @@ async def materialize(obj: object) -> object:
         materialized_obj = \
             dict(zip(obj, await materialize(tuple(obj.values()))))
     elif isinstance(obj, (list, tuple)):
-        materialized_obj = \
-            await asyncio.gather(*tuple(
-                elem
-                if isinstance(elem, asyncio.Future)
-                else asyncio.create_task(elem)
-                for elem in obj
-            ))
+        materialized_obj = await asyncio.gather(*tuple(
+            elem
+            if isinstance(elem, asyncio.Future)
+            else asyncio.create_task(elem)
+            for elem in obj
+        ))
     else:
         raise ValueError(f'Not implemented for type: {type(obj)}')
 
