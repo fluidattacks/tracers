@@ -5,6 +5,7 @@ import time
 from typing import (
     Any,
     Dict,
+    List,
     NamedTuple,
     Optional,
     Tuple,
@@ -52,7 +53,7 @@ async def query(
     range_key: Optional[str] = None,
     attributes_to_get: Optional[Tuple[str, ...]] = None,
 ) -> Tuple[Item, ...]:
-    results: Tuple[object, ...] = []
+    results: List[object] = []
 
     condition = Key('hash_key').eq(hash_key)
     if range_key:

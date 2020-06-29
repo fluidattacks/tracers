@@ -1,5 +1,8 @@
 # Standard library
 import logging
+from typing import (
+    TypeVar,
+)
 
 CHAR_SPACE = chr(0x20)
 CHAR_INFO = chr(0x1F6C8) + CHAR_SPACE
@@ -30,3 +33,5 @@ if not LOGGER_DEFAULT.hasHandlers():
 
 LOOP_CHECK_INTERVAL: float = 0.01
 LOOP_SKEW_TOLERANCE: float = 1.0
+
+T = TypeVar('T')  # pylint: disable=invalid-name

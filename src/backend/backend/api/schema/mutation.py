@@ -13,7 +13,7 @@ import backend.domain.transaction
 import tracers.function
 
 
-class TransactionInput(graphene.InputObjectType):
+class TransactionInput(graphene.InputObjectType):  # type: ignore
     initiator = graphene.String()
     stack = backend.api.schema.types.JSONString()
     tenant_id = graphene.ID()
