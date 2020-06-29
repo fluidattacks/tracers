@@ -5,6 +5,8 @@ from contextvars import (
     ContextVar,
     Token,
 )
+from decimal import Decimal
+import json
 import threading
 import time
 from typing import (
@@ -14,6 +16,11 @@ from typing import (
 )
 
 # Local libraries
+from tracers.containers import (
+    DaemonResult,
+    Frame,
+    LoopSnapshot,
+)
 from tracers.contextvars import (
     LOGGER,
 )
@@ -69,6 +76,23 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
         yield
     finally:
         contextvar.reset(token)
+
+
+def json_dumps(element: object) -> str:
+
+    def cast(obj: Any) -> Any:
+        if isinstance(obj, (DaemonResult, Frame, LoopSnapshot)):
+            casted_obj: Any = dict(zip(obj._fields, cast(tuple(obj))))
+        elif isinstance(obj, (list, set, tuple)):
+            casted_obj = list(map(cast, obj))
+        elif isinstance(obj, Decimal):
+            casted_obj = float(obj)
+        else:
+            casted_obj = obj
+
+        return casted_obj
+
+    return json.dumps(cast(element))
 
 
 def log(*parts: str) -> None:
