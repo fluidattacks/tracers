@@ -27,7 +27,7 @@ class TracersTenant(NamedTuple):
 
 def verify(function: T) -> T:
 
-    @tracers.function.trace(function_name='verify')
+    @tracers.function.trace(overridden_function=verify)
     @functools.wraps(function)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         arguments = await backend.utils.function.get_bound_arguments(

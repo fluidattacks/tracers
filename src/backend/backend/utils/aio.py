@@ -103,7 +103,7 @@ async def materialize(obj: object) -> object:
 
 def to_async(function: Callable[..., T]) -> Callable[..., Awaitable[T]]:
 
-    @tracers.function.trace(function_name='to_async')
+    @tracers.function.trace(overridden_function=to_async)
     @functools.wraps(function)
     async def wrapper(*args: str, **kwargs: Any) -> Any:
         return await ensure_io_bound(function, *args, **kwargs)

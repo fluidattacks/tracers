@@ -84,11 +84,10 @@ def measure_loop_skew(
 def record_event(
     event: str,
     function: Callable[..., Any],
-    function_name: str = '',
 ) -> None:
     STACK.set(STACK.get() + (Frame(
         event=event,
-        function=get_function_id(function, function_name),
+        function=get_function_id(function),
         level=LEVEL.get(),
         timestamp=get_monotonic_time(),
     ),))
@@ -97,11 +96,13 @@ def record_event(
 def trace(  # noqa: MC0001
     *,
     enabled: bool = True,
-    function_name: str = '',
     log_to: Optional[logging.Logger] = LOGGER_DEFAULT,
+    overridden_function: Optional[Callable[..., Any]] = None,
 ) -> Callable[[T], T]:
 
     def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
+
+        display_function = overridden_function or function
 
         if asyncio.iscoroutinefunction(function):
 
@@ -124,9 +125,9 @@ def trace(  # noqa: MC0001
                                     snapshots,
                                 )
 
-                            record_event('call', function, function_name)
+                            record_event('call', display_function)
                             result = await function(*args, **kwargs)
-                            record_event('return', function, function_name)
+                            record_event('return', display_function)
 
                             if LEVEL.get() == 1:
                                 stack = STACK.get()
@@ -160,9 +161,9 @@ def trace(  # noqa: MC0001
 
                     if enabled and TRACING.get():
                         with increase_counter(LEVEL):
-                            record_event('call', function, function_name)
+                            record_event('call', display_function)
                             result = function(*args, **kwargs)
-                            record_event('return', function, function_name)
+                            record_event('return', display_function)
 
                             if LEVEL.get() == 1:
                                 stack = STACK.get()

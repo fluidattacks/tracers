@@ -9,7 +9,7 @@ def example():
     your_business_logic('Sat Oct 11')
 
 
-@trace(function_name='custom!')
+@trace(overridden_function=example)
 def your_business_logic(date: str):
     parse(date)
     time.sleep(1.0)

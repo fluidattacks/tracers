@@ -42,17 +42,14 @@ def divide(
         on_zero_denominator if denominator == 0.0 else numerator / denominator
 
 
-def get_function_id(
-    function: Callable[..., Any],
-    function_name: str = '',
-) -> str:
+def get_function_id(function: Callable[..., Any]) -> str:
     # Adding decorators to a function modify its metadata
     #   Fortunately functools' wrapped functions keep a reference to the parent
     while hasattr(function, '__wrapped__'):
         function = getattr(function, '__wrapped__')
 
     module: str = function.__module__
-    name: str = function_name or function.__name__
+    name: str = function.__name__
     prefix = 'async ' * asyncio.iscoroutinefunction(function)
 
     if module not in {'__main__'}:
