@@ -7,7 +7,6 @@ import logging
 import threading
 from typing import (
     Any,
-    Awaitable,
     Callable,
     cast,
     List,
@@ -100,17 +99,17 @@ def trace(  # noqa: MC0001
     enabled: bool = True,
     function_name: str = '',
     log_to: Optional[logging.Logger] = LOGGER_DEFAULT,
-) -> Callable[[Callable[..., T]], Callable[..., T]]:
+) -> Callable[[T], T]:
 
-    def decorator(function: Callable[..., T]) -> Callable[..., T]:
+    def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
 
         if asyncio.iscoroutinefunction(function):
 
             @functools.wraps(function)
-            async def isolated_wrapper(*args: Any, **kwargs: Any) -> T:
+            async def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
 
                 @functools.wraps(function)
-                async def wrapper(*args: Any, **kwargs: Any) -> T:
+                async def wrapper(*args: Any, **kwargs: Any) -> Any:
                     if LEVEL.get() == 0:
                         LOGGER.set(log_to)
 
@@ -126,9 +125,7 @@ def trace(  # noqa: MC0001
                                 )
 
                             record_event('call', function, function_name)
-                            result = await cast(
-                                Awaitable[T], function(*args, **kwargs),
-                            )
+                            result = await function(*args, **kwargs)
                             record_event('return', function, function_name)
 
                             if LEVEL.get() == 1:
@@ -145,21 +142,19 @@ def trace(  # noqa: MC0001
                         TRACING.set(False)
 
                         # No overhead is introduced!
-                        result = await cast(
-                            Awaitable[T], function(*args, **kwargs),
-                        )
+                        result = await function(*args, **kwargs)
 
                     return result
 
-                return cast(T, await wrapper(*args, **kwargs))
+                return await wrapper(*args, **kwargs)
 
         elif callable(function):
 
             @functools.wraps(function)
-            def isolated_wrapper(*args: Any, **kwargs: Any) -> T:
+            def isolated_wrapper(*args: Any, **kwargs: Any) -> Any:
 
                 @functools.wraps(function)
-                def wrapper(*args: Any, **kwargs: Any) -> T:
+                def wrapper(*args: Any, **kwargs: Any) -> Any:
                     if LEVEL.get() == 0:
                         LOGGER.set(log_to)
 
@@ -187,7 +182,7 @@ def trace(  # noqa: MC0001
                     return result
 
                 if LEVEL.get() == 0:
-                    result: T = contextvars.copy_context().run(
+                    result = contextvars.copy_context().run(
                         wrapper, *args, **kwargs
                     )
                 else:
@@ -205,10 +200,10 @@ def trace(  # noqa: MC0001
 
         return isolated_wrapper
 
-    return decorator
+    return cast(Callable[[T], T], decorator)
 
 
-_DEFAULT_TRACER: Callable[[Callable[..., T]], Callable[..., T]] = trace()
+_DEFAULT_TRACER: Callable[[T], T] = trace()
 
 
 def call(function: Callable[..., T], *args: Any, **kwargs: Any) -> T:
