@@ -27,19 +27,21 @@ async def put(
     claims: backend.authc.claims.TracersTenant,
     transactions: Tuple[Transaction, ...],
 ) -> bool:
+    hash_key = await backend.dal.aws.dynamodb.build_key(claims._asdict())
+
     success = await backend.dal.aws.dynamodb.put(
         expires_in=backend.config.TRANSACTIONS_TTL,
-        items=[
+        items=tuple(
             backend.dal.aws.dynamodb.Item(
                 attributes=dict(
                     stack=transaction.stack,
                     total_time=transaction.total_time,
                 ),
-                hash_key=backend.dal.aws.dynamodb.build_key(claims.as_dict()),
+                hash_key=hash_key,
                 range_key=transaction.initiator,
             )
             for transaction in transactions
-        ],
+        ),
     )
 
     return success

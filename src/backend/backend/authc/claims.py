@@ -6,6 +6,7 @@ import functools
 import inspect
 from typing import (
     Any,
+    cast,
     Callable,
     NamedTuple,
 )
@@ -18,6 +19,9 @@ import tracers.function
 # Local libraries
 import backend.utils.function
 import backend.utils.jwt
+from backend.typing import (
+    T,
+)
 
 
 class TracersTenant(NamedTuple):
@@ -26,7 +30,7 @@ class TracersTenant(NamedTuple):
     tenant_id: str
 
 
-def verify(function: Callable[..., Any]) -> Callable[..., Any]:
+def verify(function: T) -> T:
 
     @tracers.function.trace(function_name='verify')
     @functools.wraps(function)
@@ -47,4 +51,4 @@ def verify(function: Callable[..., Any]) -> Callable[..., Any]:
 
         return await function(*args, **kwargs)
 
-    return wrapper
+    return cast(T, wrapper)

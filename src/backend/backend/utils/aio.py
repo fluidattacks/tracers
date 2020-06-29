@@ -16,6 +16,12 @@ from typing import (
 # Third party libraries
 import tracers.function
 
+# Local libraries
+from backend.typing import (
+    T,
+    V,
+)
+
 # Executors
 PROCESSOR = ProcessPoolExecutor(max_workers=cpu_count() - 1)
 THREADER = ThreadPoolExecutor(max_workers=cpu_count() - 1)
@@ -24,9 +30,8 @@ THREADER = ThreadPoolExecutor(max_workers=cpu_count() - 1)
 @tracers.function.trace()
 async def _ensure(
     executor: Union[ProcessPoolExecutor, ThreadPoolExecutor],
-    functions: Tuple[Callable[..., Any], ...],
-) -> Any:
-    print(executor, functions)
+    functions: Tuple[Callable[..., T], ...],
+) -> Tuple[T, ...]:
     loop = asyncio.get_running_loop()
 
     return await materialize(tuple(
@@ -49,10 +54,10 @@ async def ensure_cpu_bound(
 
 @tracers.function.trace()
 async def ensure_io_bound(
-    function: Callable[..., Any],
+    function: Callable[..., T],
     *args: Any,
     **kwargs: Any,
-) -> Any:
+) -> T:
     results = await _ensure(THREADER, [
         functools.partial(function, *args, **kwargs)
     ])
@@ -95,11 +100,13 @@ async def materialize(obj: object) -> object:
     return materialized_obj
 
 
-def to_async(function: Callable[..., Any]) -> Callable[..., Any]:
+def to_async(function: Callable[..., T]) -> Callable[..., T]:
 
     @tracers.function.trace(function_name='to_async')
     @functools.wraps(function)
-    async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        return await ensure_io_bound(function, *args, **kwargs)
+    async def wrapper(*args: str, **kwargs: Any) -> T:
+        result = await ensure_io_bound(function, *args, **kwargs)
+
+        return result
 
     return wrapper

@@ -39,7 +39,7 @@ class PutTransaction(graphene.Mutation):  # type: ignore
         transactions: Tuple[TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put(
-            claims=info.request['authc'],
+            claims=info.context['authc'],
             transactions=transactions,
         )
 
