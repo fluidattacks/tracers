@@ -1,6 +1,7 @@
 # Standard library
 import contextlib
 import os
+import time
 from typing import (
     Any,
     Dict,
@@ -85,6 +86,7 @@ async def query(
 @tracers.function.trace()
 async def put(
     *,
+    expires_in: Optional[float] = None,
     items: Tuple[Item, ...],
 ) -> bool:
     success: bool = True
@@ -94,6 +96,9 @@ async def put(
             overwrite_by_pkeys=['hash_key', 'range_key'],
         ) as batch:
             for item in items:
+                if expires_in:
+                    item.attributes['ttl'] = int(time.time()) + expires_in
+
                 await batch.put_item(Item=dict(
                     hash_key=item.hash_key,
                     range_key=item.range_key,

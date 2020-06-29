@@ -3,7 +3,7 @@
 /**/.terraform
 /**/__pycache__
 /**/dist
-/**/terraform.tfstate
+/**/terraform.tfstate*
 /.data
 /.envrc
 /**/poetry.lock
