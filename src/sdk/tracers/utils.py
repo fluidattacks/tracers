@@ -44,6 +44,7 @@ def divide(
 
 def get_function_id(
     function: Callable[..., Any],
+    function_name: str = '',
 ) -> str:
     # Adding decorators to a function modify its metadata
     #   Fortunately functools' wrapped functions keep a reference to the parent
@@ -51,7 +52,7 @@ def get_function_id(
         function = getattr(function, '__wrapped__')
 
     module: str = function.__module__
-    name: str = function.__name__
+    name: str = function_name or function.__name__
     prefix = 'async ' * asyncio.iscoroutinefunction(function)
 
     if module not in {'__main__'}:

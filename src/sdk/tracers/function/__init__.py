@@ -88,7 +88,7 @@ def record_event(
 ) -> None:
     STACK.set(STACK.get() + (Frame(
         event=event,
-        function=function_name or get_function_id(function),
+        function=get_function_id(function, function_name),
         level=LEVEL.get(),
         timestamp=get_monotonic_time(),
     ),))
