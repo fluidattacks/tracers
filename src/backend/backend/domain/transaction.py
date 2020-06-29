@@ -29,8 +29,7 @@ Transaction = NamedTuple('Transaction', [
 
 
 @tracers.function.trace()
-@backend.utils.aio.to_async
-def _get_intervals() -> Tuple[Tuple[int, str], ...]:
+async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
     now: float = datetime.utcnow().timestamp()
 
     stamps: Tuple[Tuple[int, str], ...] = tuple(
@@ -48,10 +47,10 @@ async def put(
     claims: backend.authc.claims.TracersTenant,
     transactions: Tuple[Transaction, ...],
 ) -> bool:
-    hash_key = await backend.dal.aws.dynamodb.build_key(claims._asdict())
+    hash_key = backend.dal.aws.dynamodb.build_key(claims._asdict())
     intervals = await _get_intervals()
 
-    return await backend.utils.aio.materialize(tuple(
+    return all(await backend.utils.aio.materialize(tuple(
         _put_one(
             hash_key=hash_key,
             interval=interval,
@@ -60,7 +59,7 @@ async def put(
         )
         for transaction in transactions
         for interval, stamp in intervals
-    ))
+    )))
 
 
 @tracers.function.trace()
@@ -70,8 +69,8 @@ async def _put_one(
     interval: int,
     stamp: str,
     transaction: Transaction,
-):
-    range_key: str = await backend.dal.aws.dynamodb.build_key({
+) -> bool:
+    range_key: str = backend.dal.aws.dynamodb.build_key({
         'initiator': transaction.initiator,
         'interval': str(interval),
         'stamp': stamp,

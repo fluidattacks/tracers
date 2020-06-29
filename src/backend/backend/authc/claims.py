@@ -30,7 +30,7 @@ def verify(function: T) -> T:
     @tracers.function.trace(overridden_function=verify)
     @functools.wraps(function)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        arguments = await backend.utils.function.get_bound_arguments(
+        arguments = backend.utils.function.get_bound_arguments(
             function, *args, **kwargs,
         )
 
@@ -40,7 +40,7 @@ def verify(function: T) -> T:
 
         _, token = request.headers['authorization'].split(' ', maxsplit=1)
 
-        claims = await backend.utils.jwt.deserialize(token)
+        claims = backend.utils.jwt.deserialize(token)
 
         info.context['authc'] = TracersTenant(**claims)
 

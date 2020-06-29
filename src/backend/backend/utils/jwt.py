@@ -20,7 +20,6 @@ import backend.utils.aio
 
 
 @tracers.function.trace()
-@backend.utils.aio.to_async
 def serialize(claims: dict) -> str:
     jwt: JWT = JWT(
         claims=JWE(
@@ -45,7 +44,6 @@ def serialize(claims: dict) -> str:
 
 
 @tracers.function.trace()
-@backend.utils.aio.to_async
 def deserialize(jwt: str) -> Dict[str, Any]:
     jwt: JWT = JWT(
         key=backend.config.JWT_SIGNING_KEY,

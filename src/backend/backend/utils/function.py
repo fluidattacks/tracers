@@ -8,12 +8,8 @@ from typing import (
 # Third party libraries
 import tracers.function
 
-# Local libraries
-import backend.utils.aio
-
 
 @tracers.function.trace()
-@backend.utils.aio.to_async
 def get_bound_arguments(
     function: Callable[..., Any],
     *args: Any,
