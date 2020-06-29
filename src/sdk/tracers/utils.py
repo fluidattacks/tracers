@@ -5,6 +5,8 @@ from contextvars import (
     ContextVar,
     Token,
 )
+from decimal import Decimal
+import json
 import threading
 import time
 from typing import (
@@ -69,6 +71,25 @@ def increase_counter(contextvar: ContextVar[int]) -> Iterator[None]:
         yield
     finally:
         contextvar.reset(token)
+
+
+def json_dumps(element: object) -> str:
+
+    def encoder(obj: Any) -> Any:
+        if isinstance(obj, tuple) and hasattr(obj, '_fields'):
+            casted_obj: Any = dict(
+                zip(obj._fields, encoder(tuple(obj))),  # type: ignore
+            )
+        elif isinstance(obj, (list, set, tuple)):
+            casted_obj = list(map(encoder, obj))
+        elif isinstance(obj, Decimal):
+            casted_obj = float(obj)
+        else:
+            casted_obj = obj
+
+        return casted_obj
+
+    return json.dumps(element, default=encoder)
 
 
 def log(*parts: str) -> None:
