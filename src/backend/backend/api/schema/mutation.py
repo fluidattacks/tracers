@@ -6,11 +6,14 @@ from typing import (
 
 # Third party libraries
 import graphene
+import tracers.function
 
 # Local libraries
 import backend.api.schema.types
 import backend.domain.transaction
-import tracers.function
+
+# Pylint config
+# pylint: disable=too-few-public-methods
 
 
 class TransactionInput(graphene.InputObjectType):  # type: ignore
@@ -29,7 +32,7 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     @tracers.function.trace()
     async def mutate(
         self,
-        info: Any,
+        _: Any,
         transactions: Tuple[TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put(

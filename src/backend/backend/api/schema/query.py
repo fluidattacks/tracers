@@ -6,10 +6,13 @@ from typing import (
 
 # Third party libraries
 import graphene
+import tracers.function
 
 # Local libraries
 import backend.api.schema.types
-import tracers.function
+
+# Pylint config
+# pylint: disable=too-few-public-methods
 
 
 class Transaction(graphene.ObjectType):  # type: ignore
@@ -25,6 +28,6 @@ class Query(graphene.ObjectType):  # type: ignore
     @tracers.function.trace()
     async def resolve_transactions(
         self,
-        info: Any,
+        _: Any,
     ) -> Tuple[Transaction, ...]:
         return ()

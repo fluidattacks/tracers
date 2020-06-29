@@ -69,7 +69,6 @@ async def ensure_many_io_bound(
     return await _ensure(THREADER, functions)
 
 
-
 @tracers.function.trace()
 async def materialize(obj: object) -> object:
     materialized_obj: object

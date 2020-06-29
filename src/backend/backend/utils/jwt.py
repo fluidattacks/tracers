@@ -12,36 +12,39 @@ from jwcrypto.jwe import (
 from jwcrypto.jwt import (
     JWT,
 )
+import tracers.function
 
 # Local libraries
 import backend.config
 import backend.utils.aio
 
 
+@tracers.function.trace()
 @backend.utils.aio.wrap_cpu_bound
 def serialize(claims: dict) -> str:
     jwt: JWT = JWT(
-      claims=JWE(
-        algs=[
-            'A256GCM',
-            'A256GCMKW',
-        ],
-        plaintext=json.dumps(claims).encode('utf-8'),
-        protected={
-          'alg': 'A256GCMKW',
-          'enc': 'A256GCM',
+        claims=JWE(
+            algs=[
+                'A256GCM',
+                'A256GCMKW',
+            ],
+            plaintext=json.dumps(claims).encode('utf-8'),
+            protected={
+                'alg': 'A256GCMKW',
+                'enc': 'A256GCM',
+            },
+            recipient=backend.config.JWT_ENCRYPTION_KEY,
+        ).serialize(),
+        header={
+            'alg': 'HS512',
         },
-        recipient=backend.config.JWT_ENCRYPTION_KEY,
-      ).serialize(),
-      header={
-        'alg': 'HS512',
-      },
     )
     jwt.make_signed_token(backend.config.JWT_SIGNING_KEY)
 
     return jwt.serialize()
 
 
+@tracers.function.trace()
 @backend.utils.aio.wrap_cpu_bound
 def deserialize(jwt: str) -> Dict[str, Any]:
     jwt: JWT = JWT(

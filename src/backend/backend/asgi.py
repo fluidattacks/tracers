@@ -1,15 +1,17 @@
+# Standard library
+import time
+
 # Third party libraries
 import graphene
-import time
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
 from starlette.routing import Route
+import tracers.function
 
 # Local libraries
 import backend.api.schema.mutation
 import backend.api.schema.query
-import tracers.function
 
 SERVER = Starlette(
     routes=[
