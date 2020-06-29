@@ -17,7 +17,6 @@ import backend.config
 Transaction = NamedTuple('Transaction', [
     ('initiator', str),
     ('stack', Tuple[Any, ...]),
-    ('stdout', str),
     ('tenant_id', str),
     ('total_time', float),
 ])
