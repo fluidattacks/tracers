@@ -1,5 +1,7 @@
 [INFO] TRACERS_API_TOKEN = <set>
 [INFO] TRACERS_ENDPOINT_URL = http://localhost:8000/api
+[INFO] TRACERS_SYSTEM_ID = default
+[INFO] New system created: default
 
 🛈  Finished transaction: 3.00 seconds
 

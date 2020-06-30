@@ -1,5 +1,7 @@
 [INFO] TRACERS_API_TOKEN = <set>
 [INFO] TRACERS_ENDPOINT_URL = http://localhost:8000/api
+[INFO] TRACERS_SYSTEM_ID = default
+[INFO] New system created: default
 
 🛈  Finished transaction: 0.80 seconds
 
@@ -28,29 +30,29 @@
                1     0.00s [  0.0%]     0.20s [ 25.0%]    ✓ function_c
                1     0.00s [  0.0%]     0.80s [100.0%]    ✓ function_a
                1     0.00s [  0.0%]     0.10s [ 12.5%]    ✓ function_e
-[ERROR] Uploading transactions: Cannot connect to host localhost:8000 ssl:default [Connect call failed ('127.0.0.1', 8000)]
+[INFO] Uploaded transactions: 1
 
 🛈  Finished transaction: 0.71 seconds
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     0.00s [  0.1%]     0.71s [100.0%]    ✓ function_b
+     1     0.00s     0.01s [  0.7%]     0.71s [100.0%]    ✓ function_b
      2     0.00s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ✓ time.sleep
-     3     0.10s     0.00s [  0.0%]     0.20s [ 28.8%]    ¦   ✓ function_c
-     4     0.10s     0.10s [ 14.5%]     0.10s [ 14.5%]    ¦   ¦   ✓ time.sleep
-     5     0.20s     0.00s [  0.0%]     0.10s [ 14.2%]    ¦   ¦   ✓ function_d
-     6     0.20s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ¦   ¦   ✓ time.sleep
-     7     0.30s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ✓ time.sleep
-     8     0.40s     0.00s [  0.0%]     0.10s [ 14.2%]    ¦   ✓ function_d
-     9     0.40s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ¦   ✓ time.sleep
-    10     0.50s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ✓ time.sleep
-    11     0.60s     0.00s [  0.0%]     0.10s [ 14.3%]    ¦   ✓ function_e
-    12     0.60s     0.10s [ 14.2%]     0.10s [ 14.2%]    ¦   ¦   ✓ time.sleep
+     3     0.10s     0.00s [  0.0%]     0.20s [ 28.3%]    ¦   ✓ function_c
+     4     0.10s     0.10s [ 14.1%]     0.10s [ 14.1%]    ¦   ¦   ✓ time.sleep
+     5     0.20s     0.00s [  0.0%]     0.10s [ 14.1%]    ¦   ¦   ✓ function_d
+     6     0.20s     0.10s [ 14.1%]     0.10s [ 14.1%]    ¦   ¦   ¦   ✓ time.sleep
+     7     0.30s     0.10s [ 14.4%]     0.10s [ 14.4%]    ¦   ✓ time.sleep
+     8     0.41s     0.00s [  0.0%]     0.10s [ 14.1%]    ¦   ✓ function_d
+     9     0.41s     0.10s [ 14.1%]     0.10s [ 14.1%]    ¦   ¦   ✓ time.sleep
+    10     0.51s     0.10s [ 14.1%]     0.10s [ 14.1%]    ¦   ✓ time.sleep
+    11     0.61s     0.00s [  0.0%]     0.10s [ 14.1%]    ¦   ✓ function_e
+    12     0.61s     0.10s [ 14.1%]     0.10s [ 14.1%]    ¦   ¦   ✓ time.sleep
 
            Count                Net              Total    Function
 
-               7     0.70s [ 99.8%]     0.70s [ 99.8%]    ✓ time.sleep
-               1     0.00s [  0.1%]     0.71s [100.0%]    ✓ function_b
-               2     0.00s [  0.0%]     0.20s [ 28.5%]    ✓ function_d
-               1     0.00s [  0.0%]     0.10s [ 14.3%]    ✓ function_e
-               1     0.00s [  0.0%]     0.20s [ 28.8%]    ✓ function_c
+               7     0.70s [ 99.2%]     0.70s [ 99.2%]    ✓ time.sleep
+               1     0.01s [  0.7%]     0.71s [100.0%]    ✓ function_b
+               2     0.00s [  0.0%]     0.20s [ 28.3%]    ✓ function_d
+               1     0.00s [  0.0%]     0.20s [ 28.3%]    ✓ function_c
+               1     0.00s [  0.0%]     0.10s [ 14.1%]    ✓ function_e
