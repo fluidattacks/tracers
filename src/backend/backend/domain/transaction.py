@@ -41,13 +41,13 @@ async def get(
     system_id: str,
 ) -> Tuple[backend.api.schema.types.Transaction, ...]:
     hash_key: str = backend.dal.aws.dynamodb.serialize_key({
-        'type': 'tenant_systems',
-        'tenant_id': claims.tenant_id,
+        'interval': str(interval),
         'system_id': system_id,
+        'tenant_id': claims.tenant_id,
+        'type': 'system_measures',
     })
     range_key: str = backend.dal.aws.dynamodb.serialize_key({
         'type': 'measure',
-        'interval': str(interval),
     })
     results = await backend.dal.aws.dynamodb.query(
         hash_key=hash_key,
@@ -71,16 +71,16 @@ async def put_many(
     system_id: str,
     transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
 ) -> bool:
-    hash_key = backend.dal.aws.dynamodb.serialize_key({
-        'type': 'tenant_systems',
-        'tenant_id': claims.tenant_id,
-        'system_id': system_id,
-    })
     intervals = await _get_intervals()
 
     return all(await backend.utils.aio.materialize([
         put_one_measure(
-            hash_key=hash_key,
+            hash_key=backend.dal.aws.dynamodb.serialize_key({
+                'interval': str(interval),
+                'system_id': system_id,
+                'tenant_id': claims.tenant_id,
+                'type': 'system_measures',
+            }),
             interval=interval,
             stamp=stamp,
             transaction=transaction,
@@ -100,7 +100,6 @@ async def put_one_measure(
 ) -> bool:
     range_key: str = backend.dal.aws.dynamodb.serialize_key({
         'type': 'measure',
-        'interval': str(interval),
         'initiator': transaction.initiator,
         'stamp': stamp,
     })
