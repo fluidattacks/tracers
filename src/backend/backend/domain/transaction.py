@@ -42,7 +42,7 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 
 
 @tracers.function.trace()
-async def put(
+async def put_many(
     *,
     claims: backend.authc.claims.TracersTenant,
     transactions: Tuple[Transaction, ...],
@@ -51,7 +51,7 @@ async def put(
     intervals = await _get_intervals()
 
     return all(await backend.utils.aio.materialize(tuple(
-        _put_one(
+        put_one(
             hash_key=hash_key,
             interval=interval,
             stamp=stamp,
@@ -63,7 +63,7 @@ async def put(
 
 
 @tracers.function.trace()
-async def _put_one(
+async def put_one(
     *,
     hash_key: str,
     interval: int,

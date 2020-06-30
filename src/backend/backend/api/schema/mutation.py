@@ -17,16 +17,9 @@ import backend.domain.transaction
 # pylint: disable=too-few-public-methods
 
 
-class TransactionInput(graphene.InputObjectType):  # type: ignore
-    initiator = graphene.String()
-    stack = backend.api.schema.types.JSONString()
-    tenant_id = graphene.ID()
-    total_time = graphene.Decimal()
-
-
 class PutTransaction(graphene.Mutation):  # type: ignore
     class Arguments:
-        transactions = graphene.List(TransactionInput)
+        transactions = graphene.List(backend.api.schema.types.TransactionInput)
 
     success = graphene.Boolean()
 
@@ -35,9 +28,9 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
-        transactions: Tuple[TransactionInput, ...],
+        transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
     ) -> 'PutTransaction':
-        success = await backend.domain.transaction.put(
+        success = await backend.domain.transaction.put_many(
             claims=getattr(info, 'context')['authc'],
             transactions=transactions,
         )

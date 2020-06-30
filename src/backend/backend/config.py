@@ -28,4 +28,4 @@ MEASURE_INTERVALS: Tuple[int, ...] = (
     604800,  # 1 week
     2592000,  # 1 month
 )
-TTL_PER_SECOND: int = 60 * 60
+TTL_PER_SECOND: int = 60
