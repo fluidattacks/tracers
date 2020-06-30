@@ -10,6 +10,7 @@ import tracers.function
 
 # Local libraries
 import backend.api.schema.types
+import backend.domain.system
 
 # Pylint config
 # pylint: disable=too-few-public-methods
@@ -31,7 +32,7 @@ class Query(graphene.ObjectType):  # type: ignore
         interval: int,
         system_id: str,
     ) -> Tuple[backend.api.schema.types.Transaction, ...]:
-        return await backend.domain.transaction.get(
+        return await backend.domain.system.get_transactions(
             claims=getattr(info, 'context')['authc'],
             interval=interval,
             system_id=system_id,
