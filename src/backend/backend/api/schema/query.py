@@ -18,9 +18,8 @@ import backend.api.schema.types
 class Query(graphene.ObjectType):  # type: ignore
     transactions = graphene.Field(
         graphene.List(backend.api.schema.types.Transaction),
-        app=graphene.String(required=True),
-        env=graphene.String(required=True),
         interval=backend.api.schema.types.TRANSACTION_INTERVAL(required=True),
+        system_id=graphene.String(required=True),
     )
 
     @tracers.function.trace()
@@ -29,13 +28,11 @@ class Query(graphene.ObjectType):  # type: ignore
         self,
         info: graphql.execution.base.ResolveInfo,
         *,
-        app: str,
-        env: str,
         interval: int,
+        system_id: str,
     ) -> Tuple[backend.api.schema.types.Transaction, ...]:
         return await backend.domain.transaction.get(
-            app=app,
             claims=getattr(info, 'context')['authc'],
-            env=env,
             interval=interval,
+            system_id=system_id,
         )

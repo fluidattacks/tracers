@@ -36,17 +36,17 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 @tracers.function.trace()
 async def get(
     *,
-    app: str,
     claims: backend.authc.claims.TracersTenant,
-    env: str,
     interval: int,
+    system_id: str,
 ) -> Tuple[backend.api.schema.types.Transaction, ...]:
     hash_key: str = backend.dal.aws.dynamodb.serialize_key({
+        'type': 'tenant_systems',
         'tenant_id': claims.tenant_id,
-        'app': app,
-        'env': env,
+        'system_id': system_id,
     })
     range_key: str = backend.dal.aws.dynamodb.serialize_key({
+        'type': 'measure',
         'interval': str(interval),
     })
     results = await backend.dal.aws.dynamodb.query(
@@ -68,12 +68,13 @@ async def get(
 async def put_many(
     *,
     claims: backend.authc.claims.TracersTenant,
+    system_id: str,
     transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
 ) -> bool:
     hash_key = backend.dal.aws.dynamodb.serialize_key({
+        'type': 'tenant_systems',
         'tenant_id': claims.tenant_id,
-        'app': claims.app,
-        'env': claims.env,
+        'system_id': system_id,
     })
     intervals = await _get_intervals()
 
@@ -98,6 +99,7 @@ async def put_one(
     transaction: backend.api.schema.types.TransactionInput,
 ) -> bool:
     range_key: str = backend.dal.aws.dynamodb.serialize_key({
+        'type': 'measure',
         'interval': str(interval),
         'initiator': transaction.initiator,
         'stamp': stamp,

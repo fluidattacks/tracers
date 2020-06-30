@@ -78,7 +78,6 @@ class JSONString(graphene.Scalar):  # type: ignore
 class TransactionInput(graphene.InputObjectType):  # type: ignore
     initiator = graphene.String()
     stack = JSONString()
-    tenant_id = graphene.ID()
     total_time = graphene.Decimal()
 
 

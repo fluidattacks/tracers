@@ -20,8 +20,6 @@ from backend.typing import (
 
 
 class TracersTenant(NamedTuple):
-    app: str
-    env: str
     tenant_id: str
 
 

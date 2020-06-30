@@ -19,7 +19,11 @@ import backend.domain.transaction
 
 class PutTransaction(graphene.Mutation):  # type: ignore
     class Arguments:
-        transactions = graphene.List(backend.api.schema.types.TransactionInput)
+        system_id = graphene.String(required=True)
+        transactions = graphene.List(
+            backend.api.schema.types.TransactionInput,
+            required=True,
+        )
 
     success = graphene.Boolean()
 
@@ -28,10 +32,12 @@ class PutTransaction(graphene.Mutation):  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
+        system_id: str,
         transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
     ) -> 'PutTransaction':
         success = await backend.domain.transaction.put_many(
             claims=getattr(info, 'context')['authc'],
+            system_id=system_id,
             transactions=transactions,
         )
 
