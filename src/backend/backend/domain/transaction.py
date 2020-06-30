@@ -3,8 +3,6 @@ from datetime import (
     datetime,
 )
 from typing import (
-    Any,
-    NamedTuple,
     Tuple,
 )
 
@@ -15,17 +13,11 @@ from boto3.dynamodb.conditions import (
 )
 
 # Local libraries
+import backend.api.schema.types
 import backend.authc.claims
 import backend.config
 import backend.dal.aws.dynamodb
 import backend.utils.aio
-
-# Containers
-Transaction = NamedTuple('Transaction', [
-    ('initiator', str),
-    ('stack', Tuple[Any, ...]),
-    ('total_time', float),
-])
 
 
 @tracers.function.trace()
@@ -42,12 +34,47 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 
 
 @tracers.function.trace()
+async def get(
+    *,
+    app: str,
+    claims: backend.authc.claims.TracersTenant,
+    env: str,
+    interval: int,
+) -> Tuple[backend.api.schema.types.Transaction, ...]:
+    hash_key: str = backend.dal.aws.dynamodb.serialize_key({
+        'tenant_id': claims.tenant_id,
+        'app': app,
+        'env': env,
+    })
+    range_key: str = backend.dal.aws.dynamodb.serialize_key({
+        'interval': str(interval),
+    })
+    results = await backend.dal.aws.dynamodb.query(
+        hash_key=hash_key,
+        range_key=range_key,
+    )
+
+    return tuple(backend.api.schema.types.Transaction(
+        initiator=result['range_key']['initiator'],
+        max_stack=result['max_stack'],
+        max_total_time=result['max_total_time'],
+        min_stack=result['min_stack'],
+        min_total_time=result['min_total_time'],
+        stamp=result['range_key']['stamp'],
+    ) for result in results)
+
+
+@tracers.function.trace()
 async def put_many(
     *,
     claims: backend.authc.claims.TracersTenant,
-    transactions: Tuple[Transaction, ...],
+    transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
 ) -> bool:
-    hash_key = backend.dal.aws.dynamodb.build_key(claims._asdict())
+    hash_key = backend.dal.aws.dynamodb.serialize_key({
+        'tenant_id': claims.tenant_id,
+        'app': claims.app,
+        'env': claims.env,
+    })
     intervals = await _get_intervals()
 
     return all(await backend.utils.aio.materialize(tuple(
@@ -68,11 +95,11 @@ async def put_one(
     hash_key: str,
     interval: int,
     stamp: str,
-    transaction: Transaction,
+    transaction: backend.api.schema.types.TransactionInput,
 ) -> bool:
-    range_key: str = backend.dal.aws.dynamodb.build_key({
-        'initiator': transaction.initiator,
+    range_key: str = backend.dal.aws.dynamodb.serialize_key({
         'interval': str(interval),
+        'initiator': transaction.initiator,
         'stamp': stamp,
     })
 

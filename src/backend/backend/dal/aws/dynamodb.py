@@ -48,21 +48,34 @@ class Request(NamedTuple):
 
 
 @tracers.function.trace()
-def build_key(parameters: Dict[str, str]) -> str:
-    if not parameters:
+def serialize_key(key: Dict[str, str]) -> str:
+    if not key:
         raise ValueError('Empty parameters')
 
     if not all(
         isinstance(obj, str)
-        for arguments in parameters.items()
+        for arguments in key.items()
         for obj in arguments
     ):
-        raise TypeError('Expected Dict[str, str]')
+        raise TypeError(f'Expected Dict[str, str], got: {type(key)}')
 
     return '/'.join(
         f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
-        for attribute_name, attribute_value in parameters.items()
+        for attribute_name, attribute_value in key.items()
     )
+
+
+@tracers.function.trace()
+def deserialize_key(key: str) -> Dict[str, str]:
+    if not isinstance(key, str):
+        raise TypeError(f'Expected str, got: {type(key)}')
+
+    return {
+        bytes.fromhex(attribute_name).decode():
+        bytes.fromhex(attribute_value).decode()
+        for attribute in key.split('/')
+        for attribute_name, attribute_value in [attribute.split(':')]
+    }
 
 
 @tracers.function.trace()
@@ -71,19 +84,21 @@ async def query(
     hash_key: str,
     range_key: Optional[str] = None,
     attributes_to_get: Optional[Tuple[str, ...]] = None,
-) -> Tuple[object, ...]:
-    results: List[object] = []
+) -> Tuple[Dict[str, Any], ...]:
+    results: List[Dict[str, Any]] = []
 
-    condition = Key('hash_key').eq(hash_key)
+    params = {
+        'KeyConditionExpression': Key('hash_key').eq(hash_key),
+    }
+
     if range_key:
-        condition &= Key('range_key').eq(range_key)
+        params['KeyConditionExpression'] &= \
+            Key('range_key').begins_with(range_key)
+
+    if attributes_to_get:
+        params['AttributesToGet'] = attributes_to_get
 
     async with _table() as table:
-        params = dict(
-            AttributesToGet=attributes_to_get,
-            KeyConditionExpression=condition,
-        )
-
         result = await table.query(**params)
         results.extend(result['Items'])
 
@@ -92,6 +107,11 @@ async def query(
 
             result = await table.query(**params)
             results.extend(result['Items'])
+
+    for result in results:
+        result.update({'hash_key': deserialize_key(result['hash_key'])})
+        if 'hash_key' in result:
+            result.update({'range_key': deserialize_key(result['range_key'])})
 
     return tuple(results)
 
