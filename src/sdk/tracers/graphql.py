@@ -10,11 +10,17 @@ from aiogqlc import GraphQLClient
 from tracers.config import (
     CONFIG,
 )
+from tracers.utils import (
+    log,
+)
 
-if all([
-    CONFIG.api_token,
-    CONFIG.endpoint_url,
-]):
+REQUIRED_VARIABLES = [
+    (CONFIG.api_token, CONFIG.api_token_source),
+    (CONFIG.endpoint_url, CONFIG.endpoint_url_source),
+    (CONFIG.system_id, CONFIG.system_id_source),
+]
+
+if all(var for var, _ in REQUIRED_VARIABLES):
     CLIENT: Optional[GraphQLClient] = GraphQLClient(
         endpoint=CONFIG.endpoint_url,
         headers={
@@ -22,4 +28,11 @@ if all([
         },
     )
 else:
+    log('Please not that transactions won\'t be uploaded!!', level='warning')
+    log(level='warning')
+    log('The following environment variables are required:', level='warning')
+    for var, source in REQUIRED_VARIABLES:
+        if not var:
+            log(f'- {source}', level='warning')
+
     CLIENT = None

@@ -95,7 +95,7 @@ def json_dumps(element: object) -> str:
     return json.dumps(cast(element))
 
 
-def log(*parts: str) -> None:
+def log(*parts: str, level: str = 'info') -> None:
     logger = LOGGER.get()
     if logger:
-        logger.info(' '.join(parts))
+        getattr(logger, level)(' '.join(parts))

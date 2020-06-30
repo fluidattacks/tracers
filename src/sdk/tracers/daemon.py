@@ -13,6 +13,9 @@ import aiogqlc
 from more_itertools import iter_except
 
 # Local libraries
+from tracers.config import (
+    CONFIG,
+)
 from tracers.constants import (
     LOGGER_DAEMON,
 )
@@ -64,29 +67,31 @@ async def send_results_to_server(
         await client.execute(
             query="""
                 mutation(
+                    $systemId: [TransactionInput!]!
                     $transactions: [TransactionInput!]!
                 ) {
                     putTransaction(
+                        systemId: $systemId
                         transactions: $transactions
                     ) {
                         success
                     }
                 }
             """,
-            variables=dict(
-                transactions=[
-                    dict(
-                        initiator=result.stack[0].function,
-                        stack=json_dumps(result.stack),
-                        tenantId='123',
-                        totalTime=str(delta(
+            variables={
+                'systemId': CONFIG.system_id,
+                'transactions': [
+                    {
+                        'initiator': result.stack[0].function,
+                        'stack': json_dumps(result.stack),
+                        'totalTime': str(delta(
                             result.stack[0].timestamp,
                             result.stack[-1].timestamp,
                         )),
-                    )
+                    }
                     for result in results
                 ],
-            ),
+            },
         )
     except aiohttp.ClientError as exception:
         msg: str = str(exception)

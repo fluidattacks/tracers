@@ -11,6 +11,9 @@ from typing import (
 )
 
 # Local libraries
+from tracers.constants import (
+    LOGGER_DEFAULT
+)
 from tracers.containers import (
     Frame,
 )
@@ -18,7 +21,7 @@ from tracers.containers import (
 LEVEL: ContextVar[int] = \
     ContextVar('LEVEL', default=0)
 LOGGER: ContextVar[Optional[Logger]] = \
-    ContextVar('LOGGER', default=None)
+    ContextVar('LOGGER', default=LOGGER_DEFAULT)
 STACK: ContextVar[Tuple[Frame, ...]] = \
     ContextVar('STACK', default=())
 TRACING: ContextVar[bool] = \
