@@ -78,8 +78,8 @@ async def put_many(
     })
     intervals = await _get_intervals()
 
-    return all(await backend.utils.aio.materialize(tuple(
-        put_one(
+    return all(await backend.utils.aio.materialize([
+        put_one_measure(
             hash_key=hash_key,
             interval=interval,
             stamp=stamp,
@@ -87,11 +87,11 @@ async def put_many(
         )
         for transaction in transactions
         for interval, stamp in intervals
-    )))
+    ]))
 
 
 @tracers.function.trace()
-async def put_one(
+async def put_one_measure(
     *,
     hash_key: str,
     interval: int,
