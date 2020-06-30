@@ -126,11 +126,15 @@ async def put(requests: Tuple[Request, ...]) -> bool:
                 request.expression_attribute_names['#ttl'] = 'ttl'
                 request.expression_attribute_values[':ttl'] = \
                     int(time.time()) + request.expires_in
-                request.update_expression['SET'].add('#ttl = :ttl')
+                if request.update_expression:
+                    request.update_expression['SET'].add('#ttl = :ttl')
+                else:
+                    request.update_expression['SET'] = {'#ttl = :ttl'}
             else:
                 request.expression_attribute_names.pop('#ttl', None)
                 request.expression_attribute_values.pop(':ttl', None)
-                request.update_expression['SET'].discard('#ttl = :ttl')
+                if request.update_expression:
+                    request.update_expression['SET'].discard('#ttl = :ttl')
 
             try:
                 response = await table.update_item(

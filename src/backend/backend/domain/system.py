@@ -73,9 +73,9 @@ async def put_system(
     return await backend.dal.aws.dynamodb.put((
         backend.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
-            condition_expression=(
-                Attr('hash_key').not_exists()
-                & Attr('range_key').not_exists()
+            expires_in=(
+                backend.config.MEASURE_INTERVALS[-1]*
+                backend.config.TTL_PER_SECOND
             ),
             hash_key=backend.dal.aws.dynamodb.serialize_key({
                 'tenant_id': claims.tenant_id,

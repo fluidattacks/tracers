@@ -71,4 +71,4 @@ class PutTransactions(graphene.Mutation):  # type: ignore
 
 class Mutation(graphene.ObjectType):  # type: ignore
     put_system = PutSystem.Field()
-    put_transaction = PutTransactions.Field()
+    put_transactions = PutTransactions.Field()
