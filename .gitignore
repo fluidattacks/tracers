@@ -7,4 +7,6 @@
 /.data
 /.envrc
 /**/poetry.lock
+/src/front/node_modules
+/src/front/package-lock.json
 /src/sdk/README.md
