@@ -54,12 +54,14 @@ const config: webpack.Configuration = {
   output: {
     filename: "[name].js",
     futureEmitAssets: true,
-    path: path.resolve(__dirname, "docs"),
+    path: path.resolve(__dirname, "dist"),
   },
   plugins: [
-    new CopyWebpackPlugin([{
-      from: "static",
-    }]),
+    new CopyWebpackPlugin({
+      patterns: [
+        {from: "static"},
+      ],
+    }),
     new MiniCssExtractPlugin({
       filename: "[name].css",
     }),
