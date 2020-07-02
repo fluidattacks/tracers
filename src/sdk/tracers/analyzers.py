@@ -26,6 +26,7 @@ from tracers.utils import (
     delta,
     divide,
     log,
+    on_error,
 )
 
 Result = NamedTuple('Result', [
@@ -41,6 +42,7 @@ Result = NamedTuple('Result', [
 ])
 
 
+@on_error(of_type=Exception, return_value=None)
 def analyze_loop_snapshots(
     snapshots: Tuple[LoopSnapshot, ...],
 ) -> None:
@@ -77,6 +79,7 @@ def analyze_loop_snapshots(
             'to improve the overall system throughput')
 
 
+@on_error(of_type=Exception, return_value=None)
 def analyze_stack(  # pylint: disable=too-many-locals
     stack: Tuple[Frame, ...],
 ) -> None:

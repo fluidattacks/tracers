@@ -13,6 +13,7 @@ from typing import (
     Any,
     Callable,
     Iterator,
+    Type,
 )
 
 # Local libraries
@@ -99,3 +100,24 @@ def log(*parts: str, level: str = 'info') -> None:
     logger = LOGGER.get()
     if logger:
         getattr(logger, level)(' '.join(parts))
+
+
+def on_error(
+    *,
+    of_type: Type[Exception],
+    return_value: Any,
+) -> Callable[..., Any]:
+
+    def decorator(function: Callable[..., Any]) -> Callable[..., Any]:
+
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            try:
+                value = function(*args, **kwargs)
+            except of_type:
+                value = return_value
+
+            return value
+
+        return wrapper
+
+    return decorator
