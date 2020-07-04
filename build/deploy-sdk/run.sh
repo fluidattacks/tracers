@@ -9,15 +9,15 @@ function main {
   local version
 
   function restore_version {
-    rm --force "${_PWD}/src/sdk/README.md"
-    sed --in-place 's|^version.*$|version = "1.0.0"|g' "${_PWD}/src/sdk/pyproject.toml"
-    sed --in-place 's|^readme.*$|readme = "../../README.md"|g' "${_PWD}/src/sdk/pyproject.toml"
+    rm --force "${_PWD}/sdk/README.md"
+    sed --in-place 's|^version.*$|version = "1.0.0"|g' "${_PWD}/sdk/pyproject.toml"
+    sed --in-place 's|^readme.*$|readme = "../README.md"|g' "${_PWD}/sdk/pyproject.toml"
   }
 
       ./build/build-sdk/run.sh \
   &&  ./build/lint-sdk/run.sh \
   &&  ./build/test-sdk/run.sh \
-  &&  pushd src/sdk \
+  &&  pushd sdk \
     &&  version=$(poetry run python -c 'if True:
           import time
           now=time.gmtime()
@@ -38,7 +38,7 @@ function main {
           "release-${version}" \
     &&  echo "[INFO] Publishing: ${version}" \
     &&  trap 'restore_version' 'EXIT' \
-    &&  cp --force ../../README.md . \
+    &&  cp --force ../README.md . \
     &&  sed --in-place \
           "s|^version = .*$|version = \"${version}\"|g" \
           'pyproject.toml' \

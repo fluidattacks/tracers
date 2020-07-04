@@ -4,7 +4,7 @@ source 'build/include/generic/shell-options.sh'
 
 function main {
       echo '[INFO] Linting the back-end' \
-  && pushd src/backend \
+  && pushd server \
     &&  poetry run mypy \
           --ignore-missing-imports \
           --strict \

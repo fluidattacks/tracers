@@ -4,7 +4,7 @@ source 'build/include/generic/shell-options.sh'
 
 function main {
       echo '[INFO] Linting SDK' \
-  && pushd src/sdk \
+  && pushd sdk \
     &&  poetry run mypy \
           --ignore-missing-imports \
           --strict \
@@ -15,7 +15,7 @@ function main {
     &&  poetry run prospector \
           --strictness veryhigh \
           --without-tool pep257 \
-          ../../examples \
+          ../examples \
   &&  popd \
   ||  return 1
 }
