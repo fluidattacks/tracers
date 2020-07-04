@@ -28,7 +28,7 @@ CONFIG = dict(
     aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
     aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
     aws_session_token=os.environ.get('AWS_SESSION_TOKEN'),
-    endpoint_url='http://localhost:8022',
+    endpoint_url=os.environ['DYNAMO_ENDPOINT'],
     region_name=os.environ['AWS_DEFAULT_REGION'],
     service_name='dynamodb',
 )

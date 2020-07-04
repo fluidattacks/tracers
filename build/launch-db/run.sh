@@ -4,6 +4,7 @@
 #!   nix-shell --keep AWS_DEFAULT_REGION
 #!   nix-shell --keep AWS_SECRET_ACCESS_KEY
 #!   nix-shell --keep AWS_SESSION_TOKEN
+#!   nix-shell --keep DYNAMO_ENDPOINT
 #!   nix-shell --option restrict-eval false
 #!   nix-shell --option sandbox false
 #!   nix-shell --show-trace
@@ -14,6 +15,7 @@ source "${srcShellOptions}"
 
 function main {
   export srcExternalDynamoDbLocal
+  export TF_VAR_dynamo_endpoint="${DYNAMO_ENDPOINT}"
   local data_folder='./.data/dynamo'
   local dynamo_port='8022'
   local dynamo_pid=''

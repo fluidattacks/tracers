@@ -36,7 +36,6 @@ def render_template(
 ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
 
     async def render(request: Request) -> Response:
-        print(render, context, template, request)
         return TEMPLATING_ENGINE.TemplateResponse(
             name=template,
             context=dict(request=request, **context),

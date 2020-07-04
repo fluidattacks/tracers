@@ -2,6 +2,10 @@ module "aws" {
   source = "./aws"
 }
 
+variable "dynamo_endpoint" {
+  type = string
+}
+
 provider "aws" {
   skip_credentials_validation = true
   skip_metadata_api_check     = true
@@ -9,7 +13,7 @@ provider "aws" {
   version                     = "2.67.0"
 
   endpoints {
-    dynamodb = "http://localhost:8022"
+    dynamodb = var.dynamo_endpoint
   }
 }
 
