@@ -9,9 +9,9 @@ import graphql.execution.base
 import tracers.function
 
 # Local libraries
-import backend.api.schema.types
-import backend.authc.claims
-import backend.domain.system
+import server.api.schema.types
+import server.authc.claims
+import server.domain.system
 
 # Pylint config
 # pylint: disable=too-few-public-methods
@@ -24,13 +24,13 @@ class PutSystem(graphene.Mutation):  # type: ignore
     success = graphene.Boolean()
 
     @tracers.function.trace()
-    @backend.authc.claims.verify  # type: ignore
+    @server.authc.claims.verify  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
         system_id: str,
     ) -> 'PutSystem':
-        success = await backend.domain.system.put_system(
+        success = await server.domain.system.put_system(
             claims=getattr(info, 'context')['authc'],
             system_id=system_id,
         )
@@ -44,21 +44,21 @@ class PutTransactions(graphene.Mutation):  # type: ignore
     class Arguments:
         system_id = graphene.String(required=True)
         transactions = graphene.List(
-            backend.api.schema.types.TransactionInput,
+            server.api.schema.types.TransactionInput,
             required=True,
         )
 
     success = graphene.Boolean()
 
     @tracers.function.trace()
-    @backend.authc.claims.verify  # type: ignore
+    @server.authc.claims.verify  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
         system_id: str,
-        transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
+        transactions: Tuple[server.api.schema.types.TransactionInput, ...],
     ) -> 'PutTransactions':
-        success = await backend.domain.system.put_transactions(
+        success = await server.domain.system.put_transactions(
             claims=getattr(info, 'context')['authc'],
             system_id=system_id,
             transactions=transactions,

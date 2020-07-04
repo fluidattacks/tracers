@@ -4,9 +4,9 @@ authors = [
 ]
 description = "Open-Source APM (Application monitoring) project that offers you minimal overhead wrappers for profiling your code execution flow"
 license = "MIT"
-name = "backend"
+name = "server"
 packages = [
-  { include = "backend" },
+  { include = "server" },
 ]
 repository = "https://github.com/kamadorueda/tracers"
 version = "1.0.0"
@@ -30,4 +30,4 @@ mypy = "0.770"
 requires = [
   "poetry>=0.12"
 ]
-build-backend = "poetry.masonry.api"
+build-server = "poetry.masonry.api"

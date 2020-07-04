@@ -13,11 +13,11 @@ from boto3.dynamodb.conditions import (
 )
 
 # Local libraries
-import backend.api.schema.types
-import backend.authc.claims
-import backend.config
-import backend.dal.aws.dynamodb
-import backend.utils.aio
+import server.api.schema.types
+import server.authc.claims
+import server.config
+import server.dal.aws.dynamodb
+import server.utils.aio
 
 
 @tracers.function.trace()
@@ -27,7 +27,7 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
     stamps: Tuple[Tuple[int, str], ...] = tuple(
         (interval,
          datetime.utcfromtimestamp(interval * (now // interval)).isoformat())
-        for interval in backend.config.MEASURE_INTERVALS
+        for interval in server.config.MEASURE_INTERVALS
     )
 
     return stamps
@@ -36,25 +36,25 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 @tracers.function.trace()
 async def get_transactions(
     *,
-    claims: backend.authc.claims.TracersTenant,
+    claims: server.authc.claims.TracersTenant,
     interval: int,
     system_id: str,
-) -> Tuple[backend.api.schema.types.Transaction, ...]:
-    hash_key: str = backend.dal.aws.dynamodb.serialize_key({
+) -> Tuple[server.api.schema.types.Transaction, ...]:
+    hash_key: str = server.dal.aws.dynamodb.serialize_key({
         'interval': str(interval),
         'system_id': system_id,
         'tenant_id': claims.tenant_id,
         'type': 'measures',
     })
-    range_key: str = backend.dal.aws.dynamodb.serialize_key({
+    range_key: str = server.dal.aws.dynamodb.serialize_key({
         'type': 'transactions',
     })
-    results = await backend.dal.aws.dynamodb.query(
+    results = await server.dal.aws.dynamodb.query(
         hash_key=hash_key,
         range_key=range_key,
     )
 
-    return tuple(backend.api.schema.types.Transaction(
+    return tuple(server.api.schema.types.Transaction(
         initiator=result['range_key']['initiator'],
         max_stack=result['max_stack'],
         max_total_time=result['max_total_time'],
@@ -67,21 +67,21 @@ async def get_transactions(
 @tracers.function.trace()
 async def put_system(
     *,
-    claims: backend.authc.claims.TracersTenant,
+    claims: server.authc.claims.TracersTenant,
     system_id: str,
 ) -> bool:
-    return await backend.dal.aws.dynamodb.put((
-        backend.dal.aws.dynamodb.Request(
+    return await server.dal.aws.dynamodb.put((
+        server.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
             expires_in=(
-                backend.config.MEASURE_INTERVALS[-1]*
-                backend.config.TTL_PER_SECOND
+                server.config.MEASURE_INTERVALS[-1]*
+                server.config.TTL_PER_SECOND
             ),
-            hash_key=backend.dal.aws.dynamodb.serialize_key({
+            hash_key=server.dal.aws.dynamodb.serialize_key({
                 'tenant_id': claims.tenant_id,
                 'type': 'tenants',
             }),
-            range_key=backend.dal.aws.dynamodb.serialize_key({
+            range_key=server.dal.aws.dynamodb.serialize_key({
                 'type': 'systems',
                 'system_id': system_id,
             }),
@@ -92,15 +92,15 @@ async def put_system(
 @tracers.function.trace()
 async def put_transactions(
     *,
-    claims: backend.authc.claims.TracersTenant,
+    claims: server.authc.claims.TracersTenant,
     system_id: str,
-    transactions: Tuple[backend.api.schema.types.TransactionInput, ...],
+    transactions: Tuple[server.api.schema.types.TransactionInput, ...],
 ) -> bool:
     intervals = await _get_intervals()
 
-    return all(await backend.utils.aio.materialize([
+    return all(await server.utils.aio.materialize([
         put_transaction(
-            hash_key=backend.dal.aws.dynamodb.serialize_key({
+            hash_key=server.dal.aws.dynamodb.serialize_key({
                 'interval': str(interval),
                 'system_id': system_id,
                 'tenant_id': claims.tenant_id,
@@ -121,23 +121,23 @@ async def put_transaction(
     hash_key: str,
     interval: int,
     stamp: str,
-    transaction: backend.api.schema.types.TransactionInput,
+    transaction: server.api.schema.types.TransactionInput,
 ) -> bool:
-    range_key: str = backend.dal.aws.dynamodb.serialize_key({
+    range_key: str = server.dal.aws.dynamodb.serialize_key({
         'type': 'transactions',
         'initiator': transaction.initiator,
         'stamp': stamp,
     })
 
-    return await backend.dal.aws.dynamodb.put((
+    return await server.dal.aws.dynamodb.put((
         # Initialize the item if it does not exist
-        backend.dal.aws.dynamodb.Request(
+        server.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
             condition_expression=(
                 Attr('hash_key').not_exists()
                 & Attr('range_key').not_exists()
             ),
-            expires_in=interval * backend.config.TTL_PER_SECOND,
+            expires_in=interval * server.config.TTL_PER_SECOND,
             expression_attribute_values={
                 ':stack': transaction.stack,
                 ':total_time': transaction.total_time,
@@ -154,7 +154,7 @@ async def put_transaction(
             },
         ),
         # Update the minimun transaction
-        backend.dal.aws.dynamodb.Request(
+        server.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
             condition_expression=(
                 Attr('min_total_time').exists()
@@ -174,7 +174,7 @@ async def put_transaction(
             },
         ),
         # Update the maximum transaction
-        backend.dal.aws.dynamodb.Request(
+        server.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
             condition_expression=(
                 Attr('max_total_time').exists()

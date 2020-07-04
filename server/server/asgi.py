@@ -10,8 +10,8 @@ from starlette.routing import Route
 import tracers.function
 
 # Local libraries
-import backend.api.schema.mutation
-import backend.api.schema.query
+import server.api.schema.mutation
+import server.api.schema.query
 
 SERVER = Starlette(
     routes=[
@@ -19,8 +19,8 @@ SERVER = Starlette(
             executor_class=AsyncioExecutor,
             graphiql=True,
             schema=graphene.Schema(
-                mutation=backend.api.schema.mutation.Mutation,
-                query=backend.api.schema.query.Query,
+                mutation=server.api.schema.mutation.Mutation,
+                query=server.api.schema.query.Query,
             ),
         )),
     ],

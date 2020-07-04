@@ -19,7 +19,7 @@ from typing import (
 import tracers.function
 
 # Local libraries
-from backend.typing import (
+from server.typing import (
     T,
 )
 

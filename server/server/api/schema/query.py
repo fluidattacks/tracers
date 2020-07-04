@@ -9,8 +9,8 @@ import graphql.execution.base
 import tracers.function
 
 # Local libraries
-import backend.api.schema.types
-import backend.domain.system
+import server.api.schema.types
+import server.domain.system
 
 # Pylint config
 # pylint: disable=too-few-public-methods
@@ -18,21 +18,21 @@ import backend.domain.system
 
 class Query(graphene.ObjectType):  # type: ignore
     transactions = graphene.Field(
-        graphene.List(backend.api.schema.types.Transaction),
-        interval=backend.api.schema.types.TRANSACTION_INTERVAL(required=True),
+        graphene.List(server.api.schema.types.Transaction),
+        interval=server.api.schema.types.TRANSACTION_INTERVAL(required=True),
         system_id=graphene.String(required=True),
     )
 
     @tracers.function.trace()
-    @backend.authc.claims.verify  # type: ignore
+    @server.authc.claims.verify  # type: ignore
     async def resolve_transactions(
         self,
         info: graphql.execution.base.ResolveInfo,
         *,
         interval: int,
         system_id: str,
-    ) -> Tuple[backend.api.schema.types.Transaction, ...]:
-        return await backend.domain.system.get_transactions(
+    ) -> Tuple[server.api.schema.types.Transaction, ...]:
+        return await server.domain.system.get_transactions(
             claims=getattr(info, 'context')['authc'],
             interval=interval,
             system_id=system_id,

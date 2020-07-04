@@ -9,7 +9,7 @@ function main {
           --host 0.0.0.0 \
           --port 8000 \
           --reload \
-          backend.asgi:SERVER \
+          server.asgi:SERVER \
   &&  popd \
   ||  return 1
 }

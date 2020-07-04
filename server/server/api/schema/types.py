@@ -16,7 +16,7 @@ import graphene
 import graphql.language.ast
 
 # Local libraries
-import backend.config
+import server.config
 
 # Pylint config
 # pylint: disable=too-few-public-methods
@@ -92,5 +92,5 @@ class Transaction(graphene.ObjectType):  # type: ignore
 
 TRANSACTION_INTERVAL = graphene.Enum('TransactionInterval', [
     (f'INTERVAL_{interval}', interval)
-    for interval in backend.config.MEASURE_INTERVALS
+    for interval in server.config.MEASURE_INTERVALS
 ])

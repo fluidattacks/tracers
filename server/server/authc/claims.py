@@ -12,9 +12,9 @@ import starlette.requests
 import tracers.function
 
 # Local libraries
-import backend.utils.function
-import backend.utils.jwt
-from backend.typing import (
+import server.utils.function
+import server.utils.jwt
+from server.typing import (
     T,
 )
 
@@ -28,7 +28,7 @@ def verify(function: T) -> T:
     @tracers.function.trace(overridden_function=verify)
     @functools.wraps(function)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        arguments = backend.utils.function.get_bound_arguments(
+        arguments = server.utils.function.get_bound_arguments(
             function, *args, **kwargs,
         )
 
@@ -38,7 +38,7 @@ def verify(function: T) -> T:
 
         _, token = request.headers['authorization'].split(' ', maxsplit=1)
 
-        claims = backend.utils.jwt.deserialize(token)
+        claims = server.utils.jwt.deserialize(token)
 
         info.context['authc'] = TracersTenant(**claims)
 
