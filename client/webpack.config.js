@@ -2,7 +2,8 @@ const path = require('path');
 
 module.exports = {
   devServer: {
-    contentBase: path.join(__dirname, 'public')
+    contentBase: path.join(__dirname, '../static'),
+    port: '9000',
   },
   devtool: 'cheap-module-eval-source-map',
   entry: './src/index.jsx',
@@ -17,6 +18,6 @@ module.exports = {
   },
   output: {
     filename: 'client.js',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, '../static'),
   },
 };

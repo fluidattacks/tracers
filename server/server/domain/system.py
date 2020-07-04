@@ -74,7 +74,7 @@ async def put_system(
         server.dal.aws.dynamodb.Request(
             allow_condition_failure=True,
             expires_in=(
-                server.config.MEASURE_INTERVALS[-1]*
+                server.config.MEASURE_INTERVALS[-1] *
                 server.config.TTL_PER_SECOND
             ),
             hash_key=server.dal.aws.dynamodb.serialize_key({

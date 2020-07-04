@@ -7,7 +7,7 @@ function main {
   && pushd server \
     &&  poetry run uvicorn \
           --host 0.0.0.0 \
-          --port 8000 \
+          --port 9001 \
           --reload \
           server.asgi:SERVER \
   &&  popd \

@@ -13,7 +13,9 @@ version = "1.0.0"
 
 [tool.poetry.dependencies]
 aioboto3 = "8.0.3"
+aiofiles = "0.5.0"
 graphene = "2.1.8"
+jinja2 = "2.11.2"
 jwcrypto = "0.7"
 python = "^3.7"
 python-dateutil = "2.8.1"

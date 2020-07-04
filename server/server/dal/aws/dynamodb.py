@@ -41,7 +41,7 @@ class Request(NamedTuple):
 
     allow_condition_failure: bool = False
     condition_expression: Optional[Any] = None
-    expires_in: Optional[float] = None
+    expires_in: Optional[int] = None
     expression_attribute_names: Dict[str, Any] = {}
     expression_attribute_values: Dict[str, Any] = {}
     update_expression: Dict[str, Set[str]] = {}
@@ -117,24 +117,31 @@ async def query(
 
 
 @tracers.function.trace()
+def _put__patch_request_ttl(request: Request) -> None:
+    if request.expires_in:
+        ttl: int = int(time.time()) + request.expires_in
+
+        request.expression_attribute_names['#ttl'] = 'ttl'
+        request.expression_attribute_values[':ttl'] = ttl
+
+        if request.update_expression:
+            request.update_expression['SET'].add('#ttl = :ttl')
+        else:
+            request.update_expression['SET'] = {'#ttl = :ttl'}
+    else:
+        request.expression_attribute_names.pop('#ttl', None)
+        request.expression_attribute_values.pop(':ttl', None)
+        if request.update_expression:
+            request.update_expression['SET'].discard('#ttl = :ttl')
+
+
+@tracers.function.trace()
 async def put(requests: Tuple[Request, ...]) -> bool:
     success: List[bool] = []
 
     async with _table() as table:
         for request in requests:
-            if request.expires_in:
-                request.expression_attribute_names['#ttl'] = 'ttl'
-                request.expression_attribute_values[':ttl'] = \
-                    int(time.time()) + request.expires_in
-                if request.update_expression:
-                    request.update_expression['SET'].add('#ttl = :ttl')
-                else:
-                    request.update_expression['SET'] = {'#ttl = :ttl'}
-            else:
-                request.expression_attribute_names.pop('#ttl', None)
-                request.expression_attribute_values.pop(':ttl', None)
-                if request.update_expression:
-                    request.update_expression['SET'].discard('#ttl = :ttl')
+            _put__patch_request_ttl(request)
 
             try:
                 response = await table.update_item(
