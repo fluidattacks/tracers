@@ -1,32 +1,33 @@
 {
   "env": {
     "browser": true,
+    "commonjs": true,
     "node": true,
     "es6": true
   },
   "extends": [
     "eslint:recommended",
-    "plugin:eslint/all",
-    "plugin:react/all",
-    "plugin:jest/all",
     "plugin:fp/recommended",
-    "plugin:prettier/recommended",
-    "prettier/react"
+    "plugin:jest/all",
+    "plugin:react/all",
+    "plugin:react-hooks/recommended"
   ],
-  "parser": "eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
     },
-    "project": "./tsconfig.json",
     "sourceType": "module"
   },
   "plugins": [
-    "react",
-    "react-hooks",
     "fp",
-    "prettier",
-    "jest"
+    "jest",
+    "react",
+    "react-hooks"
   ],
-  "root": true
+  "root": true,
+  "rules": {
+    "fp/no-mutation": ["error", {
+      "commonjs": true
+    }]
+  }
 }
