@@ -23,9 +23,9 @@ class TracersTenant(NamedTuple):
     tenant_id: str
 
 
-def verify(function: T) -> T:
+def api(function: T) -> T:
 
-    @tracers.function.trace(overridden_function=verify)
+    @tracers.function.trace(overridden_function=api)
     @functools.wraps(function)
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         arguments = server.utils.function.get_bound_arguments(
@@ -40,7 +40,7 @@ def verify(function: T) -> T:
 
         claims = server.utils.jwt.deserialize(token)
 
-        info.context['authc'] = TracersTenant(**claims)
+        info.context['claims'] = TracersTenant(**claims)
 
         return await function(*args, **kwargs)
 
