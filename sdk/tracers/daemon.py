@@ -122,7 +122,7 @@ async def send_transactions_to_server(
                 $systemId: String!
                 $transactions: [TransactionInput!]!
             ) {
-                putTransactions(
+                putSystemTransactions(
                     systemId: $systemId
                     transactions: $transactions
                 ) {

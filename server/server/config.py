@@ -10,6 +10,9 @@ from jwcrypto import (
     jwk,
 )
 
+HTTP_AUTH_HEADER: str = 'authorization'
+HTTP_AUTH_COOKIE: str = 'session'
+
 JWT_ENCRYPTION_KEY: jwk.JWK = \
     jwk.JWK(**json.loads(os.environ['JWT_ENCRYPTION_KEY']))
 JWT_SIGNING_KEY: jwk.JWK = \

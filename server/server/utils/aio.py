@@ -1,5 +1,6 @@
 # Standard library
 import asyncio
+import collections.abc
 from concurrent.futures import (
     ProcessPoolExecutor,
     ThreadPoolExecutor,
@@ -84,10 +85,19 @@ async def ensure_many_io_bound(
 async def materialize(obj: object) -> object:
     materialized_obj: object
 
-    if isinstance(obj, (dict,)):
-        materialized_obj = \
-            dict(zip(obj, await materialize(tuple(obj.values()))))
-    elif isinstance(obj, (list, tuple)):
+    # Please use abstract base classes:
+    #   https://docs.python.org/3/glossary.html#term-abstract-base-class
+    #
+    # Pick them up here according to the needed interface:
+    #   https://docs.python.org/3/library/collections.abc.html
+    #
+
+    if isinstance(obj, collections.abc.Mapping):
+        materialized_obj = dict(zip(
+            obj,
+            await materialize(obj.values()),
+        ))
+    elif isinstance(obj, collections.abc.Iterable):
         materialized_obj = await asyncio.gather(*tuple(
             elem
             if isinstance(elem, asyncio.Future)

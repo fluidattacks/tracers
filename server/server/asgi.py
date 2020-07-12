@@ -35,6 +35,7 @@ def render_template(
     template: str,
 ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
 
+    @tracers.function.trace(overridden_function=render_template)
     async def render(request: Request) -> Response:
         return TEMPLATING_ENGINE.TemplateResponse(
             name=template,
