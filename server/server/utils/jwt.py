@@ -1,8 +1,10 @@
 # Standard library
+from datetime import datetime
 import json
 from typing import (
     Any,
     Dict,
+    Optional,
 )
 
 # Third party libraries
@@ -20,7 +22,18 @@ import server.utils.aio
 
 
 @tracers.function.trace()
-def serialize(claims: dict) -> str:
+@server.utils.aio.to_async
+def serialize(claims: dict, ttl: Optional[float] = None) -> str:
+    now: float = datetime.now().timestamp()
+
+    default_claims: dict = {
+        'iat': now,
+        'nbf': now,
+    }
+
+    if ttl:
+        default_claims['exp'] = now + ttl
+
     jwt: JWT = JWT(
         claims=JWE(
             algs=[
@@ -34,6 +47,7 @@ def serialize(claims: dict) -> str:
             },
             recipient=server.config.JWT_ENCRYPTION_KEY,
         ).serialize(),
+        default_claims=default_claims,
         header={
             'alg': 'HS512',
         },
@@ -44,6 +58,7 @@ def serialize(claims: dict) -> str:
 
 
 @tracers.function.trace()
+@server.utils.aio.to_async
 def deserialize(jwt: str) -> Dict[str, Any]:
     jwt: JWT = JWT(
         key=server.config.JWT_SIGNING_KEY,

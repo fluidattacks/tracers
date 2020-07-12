@@ -94,3 +94,10 @@ TRANSACTION_INTERVAL = graphene.Enum('TransactionInterval', [
     (f'INTERVAL_{interval}', interval)
     for interval in server.config.MEASURE_INTERVALS
 ])
+
+
+class UserCredential(graphene.ObjectType):  # type: ignore
+    tenant_id = graphene.String()
+    tenant_id = graphene.String()
+    tenant_secret_hash = graphene.String()
+    tenant_secret_salt = graphene.String()

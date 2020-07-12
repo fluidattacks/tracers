@@ -14,7 +14,7 @@ from boto3.dynamodb.conditions import (
 
 # Local libraries
 import server.api.schema.types
-import server.authc.claims
+import server.authc
 import server.config
 import server.dal.aws.dynamodb
 import server.utils.aio
@@ -34,20 +34,20 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 
 
 @tracers.function.trace()
-async def get_transactions(
+async def get_system_measure__transaction(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     interval: int,
     system_id: str,
 ) -> Tuple[server.api.schema.types.Transaction, ...]:
-    hash_key: str = server.dal.aws.dynamodb.serialize_key({
+    hash_key: str = await server.dal.aws.dynamodb.serialize_key({
         'interval': str(interval),
         'system_id': system_id,
         'tenant_id': claims.tenant_id,
-        'type': 'measures',
+        'type': 'system_measure',
     })
-    range_key: str = server.dal.aws.dynamodb.serialize_key({
-        'type': 'transactions',
+    range_key: str = await server.dal.aws.dynamodb.serialize_key({
+        'type': 'transaction',
     })
     results = await server.dal.aws.dynamodb.query(
         hash_key=hash_key,
@@ -65,9 +65,9 @@ async def get_transactions(
 
 
 @tracers.function.trace()
-async def put_system(
+async def put_tenant__system(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     system_id: str,
 ) -> bool:
     return await server.dal.aws.dynamodb.put((
@@ -77,12 +77,12 @@ async def put_system(
                 server.config.MEASURE_INTERVALS[-1] *
                 server.config.TTL_PER_SECOND
             ),
-            hash_key=server.dal.aws.dynamodb.serialize_key({
+            hash_key=await server.dal.aws.dynamodb.serialize_key({
                 'tenant_id': claims.tenant_id,
-                'type': 'tenants',
+                'type': 'tenant',
             }),
-            range_key=server.dal.aws.dynamodb.serialize_key({
-                'type': 'systems',
+            range_key=await server.dal.aws.dynamodb.serialize_key({
+                'type': 'system',
                 'system_id': system_id,
             }),
         ),
@@ -90,41 +90,42 @@ async def put_system(
 
 
 @tracers.function.trace()
-async def put_transactions(
+async def put_system_measure__transactions(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     system_id: str,
     transactions: Tuple[server.api.schema.types.TransactionInput, ...],
 ) -> bool:
     intervals = await _get_intervals()
 
     return all(await server.utils.aio.materialize([
-        put_transaction(
-            hash_key=server.dal.aws.dynamodb.serialize_key({
-                'interval': str(interval),
-                'system_id': system_id,
-                'tenant_id': claims.tenant_id,
-                'type': 'measures',
-            }),
+        put_system_measure__transaction(
+            hash_key=hash_key,
             interval=interval,
             stamp=stamp,
             transaction=transaction,
         )
         for transaction in transactions
         for interval, stamp in intervals
+        for hash_key in [await server.dal.aws.dynamodb.serialize_key({
+            'interval': str(interval),
+            'system_id': system_id,
+            'tenant_id': claims.tenant_id,
+            'type': 'system_measure',
+        })]
     ]))
 
 
 @tracers.function.trace()
-async def put_transaction(
+async def put_system_measure__transaction(
     *,
     hash_key: str,
     interval: int,
     stamp: str,
     transaction: server.api.schema.types.TransactionInput,
 ) -> bool:
-    range_key: str = server.dal.aws.dynamodb.serialize_key({
-        'type': 'transactions',
+    range_key: str = await server.dal.aws.dynamodb.serialize_key({
+        'type': 'transaction',
         'initiator': transaction.initiator,
         'stamp': stamp,
     })

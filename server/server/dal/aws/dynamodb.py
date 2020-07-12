@@ -19,9 +19,10 @@ import botocore.exceptions
 from boto3.dynamodb.conditions import (
     Key,
 )
+import tracers.function
 
 # Local libraries
-import tracers.function
+import server.utils.encodings
 
 # Constants
 CONFIG = dict(
@@ -48,7 +49,7 @@ class Request(NamedTuple):
 
 
 @tracers.function.trace()
-def serialize_key(key: Dict[str, str]) -> str:
+async def serialize_key(key: Dict[str, str]) -> str:
     if not key:
         raise ValueError('Empty parameters')
 
@@ -59,20 +60,23 @@ def serialize_key(key: Dict[str, str]) -> str:
     ):
         raise TypeError(f'Expected Dict[str, str], got: {type(key)}')
 
-    return '/'.join(
-        f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
+    return '/'.join([
+        ':'.join([
+            await server.utils.encodings.encode(attribute_name),
+            await server.utils.encodings.encode(attribute_value),
+        ])
         for attribute_name, attribute_value in key.items()
-    )
+    ])
 
 
 @tracers.function.trace()
-def deserialize_key(key: str) -> Dict[str, str]:
+async def deserialize_key(key: str) -> Dict[str, str]:
     if not isinstance(key, str):
         raise TypeError(f'Expected str, got: {type(key)}')
 
     return {
-        bytes.fromhex(attribute_name).decode():
-        bytes.fromhex(attribute_value).decode()
+        await server.utils.encodings.decode(attribute_name):
+        await server.utils.encodings.decode(attribute_value)
         for attribute in key.split('/')
         for attribute_name, attribute_value in [attribute.split(':')]
     }
@@ -109,9 +113,13 @@ async def query(
             results.extend(result['Items'])
 
     for result in results:
-        result.update({'hash_key': deserialize_key(result['hash_key'])})
+        result.update({
+            'hash_key': await deserialize_key(result['hash_key']),
+        })
         if 'hash_key' in result:
-            result.update({'range_key': deserialize_key(result['range_key'])})
+            result.update({
+                'range_key': await deserialize_key(result['range_key']),
+            })
 
     return tuple(results)
 

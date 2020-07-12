@@ -1,7 +1,7 @@
 # Standard library
 import asyncio
+import collections.abc
 from concurrent.futures import (
-    ProcessPoolExecutor,
     ThreadPoolExecutor,
 )
 import functools
@@ -24,76 +24,55 @@ from server.typing import (
 )
 
 # Executors
-PROCESSOR = ProcessPoolExecutor(max_workers=cpu_count() - 1)
-THREADER = ThreadPoolExecutor(max_workers=1)
+THREADER = ThreadPoolExecutor(max_workers=2)
 
 
-@tracers.function.trace()
-async def _ensure(
-    executor: Union[ProcessPoolExecutor, ThreadPoolExecutor],
-    functions: Tuple[Callable[..., T], ...],
-) -> Tuple[T, ...]:
-    loop = asyncio.get_running_loop()
-
-    return await materialize(tuple(
-        loop.run_in_executor(executor, function) for function in functions
-    ))
-
-
-@tracers.function.trace()
-async def ensure_cpu_bound(
-    function: Callable[..., Any],
-    *args: Any,
-    **kwargs: Any,
-) -> Any:
-    results = await _ensure(PROCESSOR, [
-        functools.partial(function, *args, **kwargs)
-    ])
-
-    return results[0]
-
-
-@tracers.function.trace()
-async def ensure_io_bound(
+async def unblock(
     function: Callable[..., T],
     *args: Any,
     **kwargs: Any,
 ) -> T:
-    results = await _ensure(THREADER, [
-        functools.partial(function, *args, **kwargs)
-    ])
-
-    return results[0]
+    return await asyncio.get_running_loop().run_in_executor(
+        THREADER, functools.partial(function, *args, **kwargs),
+    )
 
 
 @tracers.function.trace()
-async def ensure_many_cpu_bound(
+async def unblock_many(
     functions: Tuple[Callable[[], Any], ...],
 ) -> Any:
-    return await _ensure(PROCESSOR, functions)
+    loop = asyncio.get_running_loop()
 
-
-@tracers.function.trace()
-async def ensure_many_io_bound(
-    functions: Tuple[Callable[[], Any], ...],
-) -> Any:
-    return await _ensure(THREADER, functions)
+    return await materialize((
+        loop.run_in_executor(THREADER, function) for function in functions
+    ))
 
 
 @tracers.function.trace()
 async def materialize(obj: object) -> object:
     materialized_obj: object
 
-    if isinstance(obj, (dict,)):
-        materialized_obj = \
-            dict(zip(obj, await materialize(tuple(obj.values()))))
-    elif isinstance(obj, (list, tuple)):
-        materialized_obj = await asyncio.gather(*tuple(
-            elem
-            if isinstance(elem, asyncio.Future)
-            else asyncio.create_task(elem)
-            for elem in obj
+    # Please use abstract base classes:
+    #   https://docs.python.org/3/glossary.html#term-abstract-base-class
+    #
+    # Pick them up here according to the needed interface:
+    #   https://docs.python.org/3/library/collections.abc.html
+    #
+
+    if isinstance(obj, collections.abc.Mapping):
+        materialized_obj = dict(zip(
+            obj,
+            await materialize(obj.values()),
         ))
+    elif isinstance(obj, collections.abc.Iterable):
+        materialized_obj = [
+            await awaitable for awaitable in [
+                elem
+                if isinstance(elem, asyncio.Future)
+                else asyncio.create_task(elem)
+                for elem in obj
+            ]
+        ]
     else:
         raise ValueError(f'Not implemented for type: {type(obj)}')
 
@@ -105,6 +84,6 @@ def to_async(function: Callable[..., T]) -> Callable[..., Awaitable[T]]:
     @tracers.function.trace(overridden_function=to_async)
     @functools.wraps(function)
     async def wrapper(*args: str, **kwargs: Any) -> Any:
-        return await ensure_io_bound(function, *args, **kwargs)
+        return await unblock(function, *args, **kwargs)
 
     return cast(Callable[..., Awaitable[T]], wrapper)
