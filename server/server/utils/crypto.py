@@ -7,11 +7,11 @@ import server.utils.encodings
 
 
 def get_hash(*, string: str, salt: str = '') -> str:
-    algorithm = hashlib.shake_256()
+    algorithm: hashlib.shake_256 = hashlib.shake_256()
     algorithm.update(salt.encode('utf-8'))
     algorithm.update(string.encode('utf-8'))
 
-    return algorithm.hexdigest()
+    return algorithm.hexdigest(1024)
 
 
 def get_salt(*, num_of_bytes: int = 64) -> str:

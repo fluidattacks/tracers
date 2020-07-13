@@ -11,6 +11,8 @@ import graphene
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.routing import Mount, Route
@@ -21,6 +23,7 @@ import tracers.function
 # Local libraries
 import server.api.schema.mutation
 import server.api.schema.query
+import server.authc
 import server.utils.aio
 
 # Implementation
@@ -46,6 +49,15 @@ def render_template(
 
 
 SERVER = Starlette(
+    middleware = [
+        Middleware(
+            cls=server.authc.AuthenticationMidleware,
+            authentication_path='/authenticate',
+            authentication_required_paths=(
+                '/api',
+            ),
+        ),
+    ],
     routes=[
         Route(
             endpoint=render_template(

@@ -19,9 +19,10 @@ import botocore.exceptions
 from boto3.dynamodb.conditions import (
     Key,
 )
+import tracers.function
 
 # Local libraries
-import tracers.function
+import server.utils.encodings
 
 # Constants
 CONFIG = dict(
@@ -60,7 +61,10 @@ def serialize_key(key: Dict[str, str]) -> str:
         raise TypeError(f'Expected Dict[str, str], got: {type(key)}')
 
     return '/'.join(
-        f'{attribute_name.encode().hex()}:{attribute_value.encode().hex()}'
+        ':'.join([
+            server.utils.encodings.encode(attribute_name),
+            server.utils.encodings.encode(attribute_value),
+        ])
         for attribute_name, attribute_value in key.items()
     )
 
@@ -71,8 +75,8 @@ def deserialize_key(key: str) -> Dict[str, str]:
         raise TypeError(f'Expected str, got: {type(key)}')
 
     return {
-        bytes.fromhex(attribute_name).decode():
-        bytes.fromhex(attribute_value).decode()
+        server.utils.encodings.decode(attribute_name):
+        server.utils.encodings.decode(attribute_value)
         for attribute in key.split('/')
         for attribute_name, attribute_value in [attribute.split(':')]
     }

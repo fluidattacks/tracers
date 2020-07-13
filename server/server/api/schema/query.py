@@ -24,7 +24,6 @@ class Query(graphene.ObjectType):  # type: ignore
     )
 
     @tracers.function.trace()
-    @server.authc.claims.process  # type: ignore
     async def resolve_transactions(
         self,
         info: graphql.execution.base.ResolveInfo,
@@ -33,7 +32,7 @@ class Query(graphene.ObjectType):  # type: ignore
         system_id: str,
     ) -> Tuple[server.api.schema.types.Transaction, ...]:
         return await server.domain.system.get_system_measure__transaction(
-            claims=getattr(info, 'context')['claims'],
+            claims=info.context['request'].state.verified_claims,
             interval=interval,
             system_id=system_id,
         )

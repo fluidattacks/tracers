@@ -31,4 +31,5 @@ MEASURE_INTERVALS: Tuple[int, ...] = (
     604800,  # 1 week
     2592000,  # 1 month
 )
+SESSION_DURATION_SECONDS: int = 3600
 TTL_PER_SECOND: int = 60

@@ -10,7 +10,6 @@ import tracers.function
 
 # Local libraries
 import server.api.schema.types
-import server.authc.claims
 import server.domain.system
 import server.domain.user
 
@@ -25,14 +24,13 @@ class PutSystem(graphene.Mutation):  # type: ignore
     success = graphene.Boolean()
 
     @tracers.function.trace()
-    @server.authc.claims.process  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
         system_id: str,
     ) -> 'PutSystem':
         success = await server.domain.system.put_tenant__system(
-            claims=getattr(info, 'context')['claims'],
+            claims=info.context['request'].state.verified_claims,
             system_id=system_id,
         )
 
@@ -52,7 +50,6 @@ class PutSystemTransactions(graphene.Mutation):  # type: ignore
     success = graphene.Boolean()
 
     @tracers.function.trace()
-    @server.authc.claims.process  # type: ignore
     async def mutate(
         self,
         info: graphql.execution.base.ResolveInfo,
@@ -60,7 +57,7 @@ class PutSystemTransactions(graphene.Mutation):  # type: ignore
         transactions: Tuple[server.api.schema.types.TransactionInput, ...],
     ) -> 'PutSystemTransactions':
         success = await server.domain.system.put_system_measure__transactions(
-            claims=getattr(info, 'context')['claims'],
+            claims=info.context['request'].state.verified_claims,
             system_id=system_id,
             transactions=transactions,
         )
@@ -98,3 +95,4 @@ class PutUser(graphene.Mutation):  # type: ignore
 class Mutation(graphene.ObjectType):  # type: ignore
     put_system = PutSystem.Field()
     put_system_transactions = PutSystemTransactions.Field()
+    put_user = PutUser.Field()

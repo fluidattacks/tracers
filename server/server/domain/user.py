@@ -2,6 +2,7 @@
 from typing import (
     Tuple,
 )
+from uuid import uuid4 as uuid
 
 # Third party libraries
 import tracers.function
@@ -11,7 +12,6 @@ from boto3.dynamodb.conditions import (
 
 # Local libraries
 import server.api.schema.types
-import server.authc.claims
 import server.config
 import server.dal.aws.dynamodb
 import server.utils.aio
@@ -34,8 +34,9 @@ async def get_user_credential(
     )
 
     return tuple(
-        server.api.schema.types.Transaction(
-            user_id=result['user_id'],
+        server.api.schema.types.UserCredential(
+            tenant_id=result['tenant_id'],
+            user_id=user_id,
             user_secret_hash=result['user_secret_hash'],
             user_secret_salt=result['user_secret_salt'],
         )
@@ -61,6 +62,7 @@ async def put_user_credential(
                 Attr('hash_key').not_exists()
             ),
             expression_attribute_values={
+                ':tenant_id': uuid().hex,
                 ':user_secret_hash': user_secret_hash,
                 ':user_secret_salt': user_secret_salt,
             },
@@ -73,6 +75,7 @@ async def put_user_credential(
             }),
             update_expression={
                 'SET': {
+                    'tenant_id = :tenant_id',
                     'user_secret_hash = :user_secret_hash',
                     'user_secret_salt = :user_secret_salt',
                 },

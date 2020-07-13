@@ -14,7 +14,7 @@ from boto3.dynamodb.conditions import (
 
 # Local libraries
 import server.api.schema.types
-import server.authc.claims
+import server.authc
 import server.config
 import server.dal.aws.dynamodb
 import server.utils.aio
@@ -36,7 +36,7 @@ async def _get_intervals() -> Tuple[Tuple[int, str], ...]:
 @tracers.function.trace()
 async def get_system_measure__transaction(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     interval: int,
     system_id: str,
 ) -> Tuple[server.api.schema.types.Transaction, ...]:
@@ -67,7 +67,7 @@ async def get_system_measure__transaction(
 @tracers.function.trace()
 async def put_tenant__system(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     system_id: str,
 ) -> bool:
     return await server.dal.aws.dynamodb.put((
@@ -92,7 +92,7 @@ async def put_tenant__system(
 @tracers.function.trace()
 async def put_system_measure__transactions(
     *,
-    claims: server.authc.claims.TracersTenant,
+    claims: server.authc.VerifiedClaims,
     system_id: str,
     transactions: Tuple[server.api.schema.types.TransactionInput, ...],
 ) -> bool:
