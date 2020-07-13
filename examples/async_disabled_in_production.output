@@ -1,16 +1,17 @@
-[INFO] TRACERS_API_TOKEN = <set>
-[INFO] TRACERS_ENDPOINT_URL = http://localhost:8000/api
-[INFO] TRACERS_SYSTEM_ID = default
-[INFO] New system created: default
+TRACERS_API_TOKEN = <set>
+TRACERS_DAEMON_SECONDS_BETWEEN_UPLOADS = 0
+TRACERS_DAEMON_LOGGING = true
+TRACERS_ENDPOINT_URL = http://localhost:9001/api
+TRACERS_SYSTEM_ID = default
 
 🛈  Finished transaction: 0.81 seconds
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     0.71s [ 87.6%]     0.81s [100.0%]    ✓ async function_a
-     2     0.00s     0.10s [ 12.4%]     0.10s [ 12.4%]    ¦   ✓ async asyncio.tasks.sleep
+     1     0.00s     0.71s [ 87.5%]     0.81s [100.0%]    ✓ async function_a
+     2     0.00s     0.10s [ 12.5%]     0.10s [ 12.5%]    ¦   ✓ async asyncio.tasks.sleep
 
            Count                Net              Total    Function
 
-               1     0.71s [ 87.6%]     0.81s [100.0%]    ✓ async function_a
-               1     0.10s [ 12.4%]     0.10s [ 12.4%]    ✓ async asyncio.tasks.sleep
+               1     0.71s [ 87.5%]     0.81s [100.0%]    ✓ async function_a
+               1     0.10s [ 12.5%]     0.10s [ 12.5%]    ✓ async asyncio.tasks.sleep

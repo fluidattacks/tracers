@@ -3,6 +3,8 @@
 source 'build/include/generic/shell-options.sh'
 
 function main {
+  export TRACERS_DAEMON_SECONDS_BETWEEN_UPLOADS='0'
+
       echo '[INFO] Testing the SDK' \
   && pushd sdk \
     &&  echo '[INFO] Running tests' \

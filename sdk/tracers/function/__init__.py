@@ -3,7 +3,6 @@ import asyncio
 import contextlib
 import contextvars
 import functools
-import logging
 import threading
 from typing import (
     Any,
@@ -14,12 +13,7 @@ from typing import (
 )
 
 # Local libraries
-from tracers.analyzers import (
-    analyze_loop_snapshots,
-    analyze_stack,
-)
 from tracers.constants import (
-    LOGGER_DEFAULT,
     LOOP_CHECK_INTERVAL,
     T,
 )
@@ -30,7 +24,6 @@ from tracers.containers import (
 )
 from tracers.contextvars import (
     LEVEL,
-    LOGGER,
     STACK,
     TRACING,
 )
@@ -85,18 +78,17 @@ def record_event(
     event: str,
     function: Callable[..., Any],
 ) -> None:
-    STACK.set(STACK.get() + (Frame(
+    STACK.get().append(Frame(
         event=event,
         function=get_function_id(function),
         level=LEVEL.get(),
         timestamp=get_monotonic_time(),
-    ),))
+    ))
 
 
 def trace(  # noqa: MC0001
     *,
     enabled: bool = True,
-    log_to: Optional[logging.Logger] = LOGGER_DEFAULT,
     overridden_function: Optional[Callable[..., Any]] = None,
 ) -> Callable[[T], T]:
 
@@ -111,18 +103,16 @@ def trace(  # noqa: MC0001
 
                 @functools.wraps(function)
                 async def wrapper(*args: Any, **kwargs: Any) -> Any:
-                    if LEVEL.get() == 0:
-                        LOGGER.set(log_to)
-
                     if enabled and TRACING.get():
                         with condition() as should_measure_loop_skew, \
                                 increase_counter(LEVEL):
                             if LEVEL.get() == 1:
+                                STACK.set([])
                                 should_measure_loop_skew.set()
-                                snapshots: List[LoopSnapshot] = []
+                                loop_snapshots: List[LoopSnapshot] = []
                                 measure_loop_skew(
                                     should_measure_loop_skew,
-                                    snapshots,
+                                    loop_snapshots,
                                 )
 
                             record_event('call', display_function)
@@ -130,12 +120,10 @@ def trace(  # noqa: MC0001
                             record_event('return', display_function)
 
                             if LEVEL.get() == 1:
-                                stack = STACK.get()
-                                analyze_stack(stack)
-                                analyze_loop_snapshots(tuple(snapshots))
                                 send_result_to_daemon(
                                     result=DaemonResult(
-                                        stack=stack,
+                                        loop_snapshots=loop_snapshots,
+                                        stack=STACK.get(),
                                     ),
                                 )
                     else:
@@ -156,21 +144,20 @@ def trace(  # noqa: MC0001
 
                 @functools.wraps(function)
                 def wrapper(*args: Any, **kwargs: Any) -> Any:
-                    if LEVEL.get() == 0:
-                        LOGGER.set(log_to)
-
                     if enabled and TRACING.get():
                         with increase_counter(LEVEL):
+                            if LEVEL.get() == 1:
+                                STACK.set([])
+
                             record_event('call', display_function)
                             result = function(*args, **kwargs)
                             record_event('return', display_function)
 
                             if LEVEL.get() == 1:
-                                stack = STACK.get()
-                                analyze_stack(stack)
                                 send_result_to_daemon(
                                     result=DaemonResult(
-                                        stack=stack,
+                                        loop_snapshots=[],
+                                        stack=STACK.get(),
                                     ),
                                 )
                     else:

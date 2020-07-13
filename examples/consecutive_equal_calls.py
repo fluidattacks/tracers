@@ -18,3 +18,4 @@ def function_b():
 
 if __name__ == '__main__':
     function_a()
+    time.sleep(1)

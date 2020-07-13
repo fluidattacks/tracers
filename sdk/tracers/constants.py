@@ -13,11 +13,6 @@ CHAR_SUPERSCRIPT_ONE = chr(0x00B9)
 LOGGER_DAEMON_HANDLER: logging.Handler = logging.StreamHandler()
 LOGGER_DAEMON_HANDLER.setLevel(logging.INFO)
 LOGGER_DAEMON_HANDLER.setFormatter(
-    logging.Formatter('[%(levelname)s] %(message)s')
-)
-LOGGER_DEFAULT_HANDLER: logging.Handler = logging.StreamHandler()
-LOGGER_DEFAULT_HANDLER.setLevel(logging.INFO)
-LOGGER_DEFAULT_HANDLER.setFormatter(
     logging.Formatter('%(message)s')
 )
 
@@ -25,11 +20,6 @@ LOGGER_DAEMON: logging.Logger = logging.getLogger('Tracers Daemon')
 LOGGER_DAEMON.setLevel(logging.INFO)
 if not LOGGER_DAEMON.hasHandlers():
     LOGGER_DAEMON.addHandler(LOGGER_DAEMON_HANDLER)
-
-LOGGER_DEFAULT: logging.Logger = logging.getLogger('Tracers')
-LOGGER_DEFAULT.setLevel(logging.INFO)
-if not LOGGER_DEFAULT.hasHandlers():
-    LOGGER_DEFAULT.addHandler(LOGGER_DEFAULT_HANDLER)
 
 LOOP_CHECK_INTERVAL: float = 0.01
 LOOP_SKEW_TOLERANCE: float = 1.0

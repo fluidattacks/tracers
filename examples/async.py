@@ -42,6 +42,7 @@ async def main():
         asyncio.create_task(function_a()),
         asyncio.create_task(function_b()),
     ])
+    await asyncio.sleep(1.0)
 
 
 if __name__ == '__main__':

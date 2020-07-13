@@ -1,10 +1,12 @@
 # Standard library
 import asyncio
-from collections import deque
-from threading import Thread
+from multiprocessing import (
+    Process,
+    Queue,
+)
+from queue import Empty
 from typing import (
     Any,
-    Deque,
     Dict,
     Tuple,
 )
@@ -15,11 +17,12 @@ import aiogqlc
 from more_itertools import iter_except
 
 # Local libraries
+from tracers.analyzers import (
+    analyze_loop_snapshots,
+    analyze_stack,
+)
 from tracers.config import (
     CONFIG,
-)
-from tracers.constants import (
-    LOGGER_DAEMON,
 )
 from tracers.containers import (
     DaemonResult,
@@ -29,43 +32,43 @@ from tracers.graphql import (
 )
 from tracers.utils import (
     delta,
+    log,
     json_dumps,
 )
 
 # Private constants
-_RESULTS_QUEUE: Deque[DaemonResult] = deque()
+_RESULTS_QUEUE: Queue = Queue()  # type: ignore
 
 
 async def daemon() -> None:
     if GRAPHQL_CLIENT:
         success, msg = await send_system_to_server(client=GRAPHQL_CLIENT)
 
-        if success:
-            LOGGER_DAEMON.info('New system created: %s', CONFIG.system_id)
-        else:
-            LOGGER_DAEMON.error('Error creating system: %s', msg)
+        if not success:
+            log(f'Error creating system: {msg}', level='error')
 
-    while await asyncio.sleep(1.0, result=True):
-        results = tuple(iter_except(_RESULTS_QUEUE.pop, IndexError))
-        results_len = len(results)
+    while await asyncio.sleep(CONFIG.daemon_interval, result=True):
+        results = tuple(iter_except(_RESULTS_QUEUE.get_nowait, Empty))
 
         if GRAPHQL_CLIENT and results:
+            for result in results:
+                analyze_stack(result.stack)
+                analyze_loop_snapshots(result.loop_snapshots)
+
             success, msg = await send_transactions_to_server(
                 client=GRAPHQL_CLIENT,
                 results=results,
             )
 
-            if success:
-                LOGGER_DAEMON.info('Uploaded transactions: %s', results_len)
-            else:
-                LOGGER_DAEMON.error('Uploading transactions: %s', msg)
+            if not success:
+                log(f'Uploaded transactions: {msg}', level='error')
 
 
 def send_result_to_daemon(
     *,
     result: DaemonResult,
 ) -> None:
-    _RESULTS_QUEUE.appendleft(result)
+    _RESULTS_QUEUE.put_nowait(result)
 
 
 async def request_server(
@@ -148,7 +151,7 @@ async def send_transactions_to_server(
 
 
 # Side effect: Start an asynchronous daemon server
-Thread(
+Process(
     daemon=True,
     name='Tracers Daemon',
     target=lambda: asyncio.run(daemon()),

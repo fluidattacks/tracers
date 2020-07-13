@@ -43,3 +43,4 @@ async def function_e():
 
 if __name__ == '__main__':
     asyncio.run(function_a())
+    asyncio.run(asyncio.sleep(1))

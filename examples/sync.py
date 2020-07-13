@@ -40,6 +40,7 @@ def function_e():
 def main():
     function_a()
     function_b()
+    time.sleep(1)
 
 
 if __name__ == '__main__':

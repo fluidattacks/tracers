@@ -2,7 +2,6 @@
 import os
 from typing import (
     NamedTuple,
-    Optional,
 )
 
 # Local libraries
@@ -11,8 +10,8 @@ from tracers.constants import (
 )
 
 
-def _get(var_name: str, var_default: Optional[str] = None) -> Optional[str]:
-    var_value: Optional[str] = os.environ.get(var_name, var_default)
+def _get(var_name: str, var_default: str) -> str:
+    var_value: str = os.environ.get(var_name, var_default)
 
     if var_name in [
         'TRACERS_API_TOKEN',
@@ -26,17 +25,23 @@ def _get(var_name: str, var_default: Optional[str] = None) -> Optional[str]:
 
 # Runtime constants
 class Config(NamedTuple):
-    api_token: Optional[str]
-    endpoint_url: Optional[str]
-    system_id: Optional[str]
+    api_token: str
+    daemon_interval: float
+    daemon_logging: bool
+    endpoint_url: str
+    system_id: str
 
     api_token_source: str = 'TRACERS_API_TOKEN'
+    daemon_interval_source: str = 'TRACERS_DAEMON_SECONDS_BETWEEN_UPLOADS'
+    daemon_logging_source: str = 'TRACERS_DAEMON_LOGGING'
     endpoint_url_source: str = 'TRACERS_ENDPOINT_URL'
     system_id_source: str = 'TRACERS_SYSTEM_ID'
 
 
 CONFIG = Config(
-    api_token=_get('TRACERS_API_TOKEN'),
-    endpoint_url=_get('TRACERS_ENDPOINT_URL'),
+    api_token=_get('TRACERS_API_TOKEN', ''),
+    daemon_interval=float(_get('TRACERS_DAEMON_SECONDS_BETWEEN_UPLOADS', '1')),
+    daemon_logging=_get('TRACERS_DAEMON_LOGGING', 'true').lower() == 'true',
+    endpoint_url=_get('TRACERS_ENDPOINT_URL', ''),
     system_id=_get('TRACERS_SYSTEM_ID', 'default'),
 )

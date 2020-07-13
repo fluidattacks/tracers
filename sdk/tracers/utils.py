@@ -22,8 +22,11 @@ from tracers.containers import (
     Frame,
     LoopSnapshot,
 )
-from tracers.contextvars import (
-    LOGGER,
+from tracers.config import (
+    CONFIG,
+)
+from tracers.constants import (
+    LOGGER_DAEMON,
 )
 
 
@@ -97,9 +100,8 @@ def json_dumps(element: object) -> str:
 
 
 def log(*parts: str, level: str = 'info') -> None:
-    logger = LOGGER.get()
-    if logger:
-        getattr(logger, level)(' '.join(parts))
+    if CONFIG.daemon_logging:
+        getattr(LOGGER_DAEMON, level)(' '.join(parts))
 
 
 def on_error(

@@ -1,16 +1,17 @@
-[INFO] TRACERS_API_TOKEN = <set>
-[INFO] TRACERS_ENDPOINT_URL = http://localhost:8000/api
-[INFO] TRACERS_SYSTEM_ID = default
-[INFO] New system created: default
+TRACERS_API_TOKEN = <set>
+TRACERS_DAEMON_SECONDS_BETWEEN_UPLOADS = 0
+TRACERS_DAEMON_LOGGING = true
+TRACERS_ENDPOINT_URL = http://localhost:9001/api
+TRACERS_SYSTEM_ID = default
 
-🛈  Finished transaction: 0.13 seconds
+🛈  Finished transaction: 0.11 seconds
 
      # Timestamp                Net              Total    Call Chain
 
-     1     0.00s     0.00s [  2.7%]     0.13s [100.0%]    ✓ function_a
-     2     0.00s     0.12s [ 97.3%]     0.12s [ 97.3%]    ¦   ✓ 100 times: function_b
+     1     0.00s     0.00s [  2.5%]     0.11s [100.0%]    ✓ function_a
+     2     0.00s     0.11s [ 97.5%]     0.11s [ 97.5%]    ¦   ✓ 100 times: function_b
 
            Count                Net              Total    Function
 
-             100     0.12s [ 97.3%]     0.12s [ 97.3%]    ✓ function_b
-               1     0.00s [  2.7%]     0.13s [100.0%]    ✓ function_a
+             100     0.11s [ 97.5%]     0.11s [ 97.5%]    ✓ function_b
+               1     0.00s [  2.5%]     0.11s [100.0%]    ✓ function_a
