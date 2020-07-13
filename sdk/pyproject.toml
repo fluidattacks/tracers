@@ -8,7 +8,7 @@ name = "tracers"
 packages = [
   { include = "tracers" },
 ]
-readme = "../../README.md"
+readme = "../README.md"
 repository = "https://github.com/kamadorueda/tracers"
 version = "1.0.0"
 
