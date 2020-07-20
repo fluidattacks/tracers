@@ -7,6 +7,14 @@ function main {
 
       echo '[INFO] Testing the SDK' \
   && pushd sdk \
+    &&  pytest \
+          --cov tracers \
+          --cov-branch \
+          --cov-fail-under '0' \
+          --cov-report 'term' \
+          --cov-report "html:${PWD}/coverage/" \
+          --cov-report "xml:${PWD}/coverage.xml" \
+          --disable-pytest-warnings \
     &&  echo '[INFO] Running tests' \
     &&  rm -f ../examples/*.output \
     &&  for example in ../examples/*.py

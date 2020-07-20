@@ -1,4 +1,5 @@
 /**/*.egg-info
+/**/*coverage*
 /**/.mypy_cache
 /**/.terraform
 /**/__pycache__
