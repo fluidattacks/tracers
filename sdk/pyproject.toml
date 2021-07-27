@@ -9,7 +9,7 @@ packages = [
   { include = "tracers" },
 ]
 readme = "../README.md"
-repository = "https://github.com/kamadorueda/tracers"
+repository = "https://github.com/fluidattacks/tracers"
 version = "1.0.0"
 
 [tool.poetry.dependencies]
