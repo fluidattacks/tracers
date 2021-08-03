@@ -5,22 +5,9 @@ from typing import (
     Optional,
 )
 
-# Local libraries
-from tracers.constants import (
-    LOGGER_DAEMON,
-)
-
 
 def _get(var_name: str, var_default: Optional[str] = None) -> Optional[str]:
     var_value: Optional[str] = os.environ.get(var_name, var_default)
-
-    if var_name in [
-        'TRACERS_API_TOKEN',
-    ]:
-        LOGGER_DAEMON.info('%s = %s', var_name, "<set>" if var_value else "")
-    else:
-        LOGGER_DAEMON.info('%s = %s', var_name, var_value)
-
     return var_value
 
 
